@@ -7,17 +7,22 @@ files = ["pack-report.txt", "pack-excl-report.txt", "scatter-report.txt", "scatt
 
 for i, file in enumerate(files, start=1):
     
-    data = pd.read_csv(file, sep=r'\s+|,', engine='python', header=None, names=['x', 'y'])
-
-    plt.figure(figsize=(6, 4))
-    plt.plot(data['x'], data['y'], marker='o', linestyle='-')
-    plt.title("Plot {}: {}".format(i, file))
-    plt.xlabel("X")
-    plt.ylabel("Y")
-    plt.grid(True)
+    data = pd.read_csv(file, sep=r'\s+|,', engine='python', header=None, skiprows=1, usecols=[0, 1], names=['x', 'y'])
     
+    
+    plt.figure(figsize=(7, 5))
+    plt.plot(data['x'], data['y'], label= 'Report', marker='o', linestyle='-')
+    
+    plt.plot(data['x'], (data['x'] * 2) / data['y'],  label= 'Bandwidth', color='red', marker='x')
+    plt.xscale('log')
+    plt.yscale('log')
+    plt.title("Grafico {}: {}".format(i, file))
+    plt.xlabel("X (log scale)")
+    plt.ylabel("Y (log scale)")
+    plt.grid(True, which="both", ls="--")
+    plt.legend()
     plt.savefig(f"plot_{i}.png", dpi=300)
     
     plt.show()
 
-print("All 4 plots generated successfully!")
+print("Generati correttamente 4 grafici!")
