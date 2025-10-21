@@ -1,4 +1,4 @@
-bytes       	   average_t	    median_t	       min_t	       max_t	   bandwidth
+bytes       	   average_t	    median_t	       min_t	       max_t	   rate
 1           	    0.004419	    0.000044	    0.000023	    0.091560	453
 2           	    0.003075	    0.000003	    0.000001	    0.077304	1301
 4           	    0.002927	    0.000001	    0.000000	    0.081578	2733
