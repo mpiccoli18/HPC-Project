@@ -1,10 +1,11 @@
 cmake_minimum_required(VERSION 3.10)
 project(SpectralClustering CXX)
 
+list(PREPEND CMAKE_PREFIX_PATH "${PROJECT_SOURCE_DIR}/lib/cmake")
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(Eigen3 3.3 REQUIRED NO_MODULE)
+find_package(Eigen3 CONFIG REQUIRED)
 
 include_directories(${PROJECT_SOURCE_DIR}/include)
 
