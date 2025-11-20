@@ -3,7 +3,7 @@
 #include <vector>
 #include <fstream>
 #include <string>
-#include <spectral_clustering.hpp>
+#include "../include/spectral_clustering.hpp"
 
 Eigen::MatrixXd load_points(const std::string& filename)
 {

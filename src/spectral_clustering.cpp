@@ -5,7 +5,7 @@
 #include <limits>
 #include <cmath>
 
-#include <k_means.hpp>
+#include "../include/k_means.hpp"
 
 /*
     Computes the similarity matrix for a given matrix of size n x d.
