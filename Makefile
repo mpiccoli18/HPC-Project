@@ -1,7 +1,7 @@
 # Compiler
 CXX = g++
 CXXFLAGS = -Wall -Wextra -std=c++20
-TARGET = bin/spectral_clustering
+TARGET = bin/main
 
 #Files
 SRCS := src/main.cpp \

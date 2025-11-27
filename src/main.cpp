@@ -17,7 +17,7 @@ Eigen::MatrixXd load_points(const std::string& filename)
 
     file.close();
     
-    int n = points.size();
+    const int n = points.size();
     Eigen::MatrixXd X(n, 2);
 
     for (int i = 0; i < n; ++i) {
@@ -30,22 +30,27 @@ Eigen::MatrixXd load_points(const std::string& filename)
 
 int main(int argc, char* argv[])
 {
-    if(argc != 2) {
-        std::cout << "Usage: ./spectral_clustering input_file_path" << std::endl; 
+    if(argc >= 2){
+        //std::cout << argc << std::endl;
+        std::cout << "Usage: ./main input_file_path" << std::endl;
+    }else{
+        std::cout << "You haven't entered any file, end of the program!" << std::endl;
+        return 0;
     }
 
-    std::string filename = argv[1];
+    const std::string filename = argv[1];
     Eigen::MatrixXd X;
 
-    try {
+    //std::cout << filename << std::endl;
+    try{
         X = load_points(filename);
     } catch (const std::exception& e) {
         std::cerr << "Error loading input: " << e.what() << std::endl;
         return 1;
     }
 
-    int k = 2;
-    std::vector<int> labels = spectral_clustering(X, k, 1.0);
+    const int k = 2;
+    const std::vector<int> labels = spectral_clustering(X, k, 1.0);
 
     std::cout << "Spectral clustering results:\n";
 

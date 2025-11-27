@@ -7,16 +7,16 @@
     The diagonal is set to 0, for the sake of graph Laplacians.
     The sigma parameter controls the width of the Gaussian.
 */
-Eigen::MatrixXd gaussian_similarity_matrix(const Eigen::MatrixXd& matrix, double sigma) {
-    int n = matrix.rows();
+Eigen::MatrixXd gaussian_similarity_matrix(const Eigen::MatrixXd& matrix, const double sigma) {
+    const int n = matrix.rows();
     Eigen::MatrixXd similarity_matrix = Eigen::MatrixXd::Zero(n, n);
 
-    double denominator = 2 * sigma * sigma;
-
+    const double denominator = 2 * sigma * sigma;
+    double squared_euclidean_distance, similarity;
     for (int i = 0; i < n; ++i) {
         for (int j = i + 1; j < n; ++j) {
-            double squared_euclidean_distance = (matrix.row(i) - matrix.row(j)).squaredNorm();
-            double similarity = exp(-squared_euclidean_distance / denominator);
+            squared_euclidean_distance = (matrix.row(i) - matrix.row(j)).squaredNorm();
+            similarity = exp(-squared_euclidean_distance / denominator);
             
             similarity_matrix(i, j) = similarity;
             similarity_matrix(j, i) = similarity;
@@ -26,8 +26,8 @@ Eigen::MatrixXd gaussian_similarity_matrix(const Eigen::MatrixXd& matrix, double
     return similarity_matrix;
 }
 
-std::vector<int> spectral_clustering(const Eigen::MatrixXd& matrix, int k, double sigma = 1.0) {
-    int n = matrix.rows();
+std::vector<int> spectral_clustering(const Eigen::MatrixXd& matrix, const int k, double sigma = 1.0) {
+    const int n = matrix.rows();
     Eigen::MatrixXd similarity_matrix = gaussian_similarity_matrix(matrix, sigma);
 
     // diagonal matrix
@@ -44,7 +44,7 @@ std::vector<int> spectral_clustering(const Eigen::MatrixXd& matrix, int k, doubl
     Eigen::MatrixXd L = Eigen::MatrixXd::Identity(n, n) - diagonal_matrix * similarity_matrix * diagonal_matrix;
 
     // eigen decomposition
-    Eigen::SelfAdjointEigenSolver<Eigen::MatrixXd> solver(L);
+    const Eigen::SelfAdjointEigenSolver<Eigen::MatrixXd> solver(L);
     Eigen::MatrixXd eigenvectors = solver.eigenvectors().leftCols(k);
 
     // normalize rows
