@@ -1,13 +1,15 @@
 cmake_minimum_required(VERSION 3.10)
 project(SpectralClustering CXX)
 
-list(PREPEND CMAKE_PREFIX_PATH "${PROJECT_SOURCE_DIR}/lib/cmake")
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(Eigen3 CONFIG REQUIRED)
-
 include_directories(${PROJECT_SOURCE_DIR}/include)
+
+add_library(Eigen3 INTERFACE)
+target_include_directories(Eigen3 INTERFACE
+    ${PROJECT_SOURCE_DIR}/lib/Eigen
+)
 
 set(SOURCES
     src/main.cpp
@@ -17,4 +19,5 @@ set(SOURCES
 
 add_executable(spectral_clustering ${SOURCES})
 
-target_link_libraries(spectral_clustering Eigen3::Eigen)
+target_link_libraries(spectral_clustering PRIVATE Eigen3)
+
