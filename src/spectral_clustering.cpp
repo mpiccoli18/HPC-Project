@@ -1,4 +1,4 @@
-#include "../include/k_means.hpp"
+#include "k_means.hpp"
 
 /*
     Computes the similarity matrix for a given matrix of size n x d.

@@ -6,7 +6,7 @@
 #include <random>
 #include <limits>
 #include <cmath>
-#include "../lib/Eigen/Dense"
+#include <Eigen/Dense>
 
 std::vector<int> k_means(const Eigen::MatrixXd& matrix, int k, int max_iters = 100);
 

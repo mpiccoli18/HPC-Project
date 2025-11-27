@@ -1,4 +1,4 @@
-#include "../include/spectral_clustering.hpp"
+#include "spectral_clustering.hpp"
 
 Eigen::MatrixXd load_points(const std::string& filename)
 {
