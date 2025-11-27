@@ -6,10 +6,15 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 include_directories(${PROJECT_SOURCE_DIR}/include)
 
+# Eigen
 add_library(Eigen3 INTERFACE)
 target_include_directories(Eigen3 INTERFACE
     ${PROJECT_SOURCE_DIR}/lib/Eigen
 )
+
+# MPI
+find_package(MPI REQUIRED)
+include_directories(${MPI_CXX_INCLUDE_PATH})
 
 set(SOURCES
     src/main.cpp
@@ -19,5 +24,9 @@ set(SOURCES
 
 add_executable(spectral_clustering ${SOURCES})
 
-target_link_libraries(spectral_clustering PRIVATE Eigen3)
+target_link_libraries(spectral_clustering
+    PRIVATE
+        Eigen3
+        MPI::MPI_CXX
+)
 
