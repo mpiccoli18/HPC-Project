@@ -1,7 +1,6 @@
 # Compiler
 CXX = g++
-EIGEN_DIR = /home/mpiccoli/HPC-Project/lib
-CXXFLAGS = -Wall -Wextra -std=c++17 -I$(EIGEN_DIR)
+CXXFLAGS = -Wall -Wextra -std=c++20
 TARGET = bin/spectral_clustering
 
 #Files

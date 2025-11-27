@@ -1,10 +1,3 @@
-#include <iostream>
-#include <Eigen/Dense>
-#include <vector>
-#include <random>
-#include <limits>
-#include <cmath>
-
 #include "../include/k_means.hpp"
 
 /*
