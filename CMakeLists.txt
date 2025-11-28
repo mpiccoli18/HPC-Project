@@ -7,9 +7,9 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 include_directories(${PROJECT_SOURCE_DIR}/include)
 
 # Eigen
-add_library(Eigen3 INTERFACE)
-target_include_directories(Eigen3 INTERFACE
-    ${PROJECT_SOURCE_DIR}/lib/Eigen
+add_library(Eigen5 INTERFACE)
+target_include_directories(Eigen5 INTERFACE
+    ${PROJECT_SOURCE_DIR}/lib/eigen-5.0.1
 )
 
 # MPI
@@ -26,7 +26,7 @@ add_executable(spectral_clustering ${SOURCES})
 
 target_link_libraries(spectral_clustering
     PRIVATE
-        Eigen3
+        Eigen5
         MPI::MPI_CXX
 )
 
