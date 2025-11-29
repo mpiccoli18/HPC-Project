@@ -4,6 +4,8 @@
 #include <iostream>
 #include <vector>
 #include <string>
+#include <algorithm>
+#include <filesystem>
 
 #include "spectral_clustering.hpp"
 
@@ -24,7 +26,7 @@ bool load_csv_3d(
     std::vector<int> labs;
 
     while (std::getline(file, line)) {
-        if (first) {  // skip header
+        if (first) {
             first = false;
             continue;
         }
@@ -35,11 +37,8 @@ bool load_csv_3d(
         int idx = 0;
 
         while (std::getline(ss, cell, ',')) {
-            if (idx < 3) {
-                vals[idx] = std::stod(cell);
-            } else {
-                labs.push_back(std::stoi(cell));
-            }
+            if (idx < 3) vals[idx] = std::stod(cell);
+            else labs.push_back(std::stoi(cell));
             idx++;
         }
 
@@ -48,10 +47,8 @@ bool load_csv_3d(
 
     file.close();
 
-    int n = points.size();
-    data.resize(n, 3);
-
-    for (int i = 0; i < n; ++i)
+    data.resize(points.size(), 3);
+    for (size_t i = 0; i < points.size(); ++i)
         data.row(i) = points[i];
 
     labels = std::move(labs);
@@ -60,7 +57,7 @@ bool load_csv_3d(
 
 int main(int argc, char** argv) {
     if (argc < 2) {
-        std::cerr << "Usage: ./program <dataset.csv>" << std::endl;
+        std::cerr << "Usage: ./program input_file.csv" << std::endl;
         return 1;
     }
 
@@ -71,13 +68,27 @@ int main(int argc, char** argv) {
         return 1;
     }
 
-    auto iter = std::max_element(labels.begin(), labels.end());
+    int max_label = *std::max_element(labels.begin(), labels.end());
+    std::vector<int> output_labels = spectral_clustering(X, max_label + 1);
 
-    std::vector<int> output_labels = spectral_clustering(X, *iter + 1);
+    std::filesystem::create_directories("data/output");
 
-    for (size_t i = 0; i < labels.size(); ++i) {
-        std::cout << labels[i] << " -> " << output_labels[i] << std::endl;
+    std::string input_path = argv[1];
+    std::string base = std::filesystem::path(input_path).stem().string();
+    std::string out_path = "data/output/" + base + "_clustered.csv";
+
+    std::ofstream out(out_path);
+    if (!out.is_open()) {
+        std::cerr << "Error: cannot write output file " << out_path << std::endl;
+        return 1;
     }
 
+    out << "x,y,z,label\n";
+    for (int i = 0; i < X.rows(); ++i) {
+        out << X(i,0) << "," << X(i,1) << "," << X(i,2) << "," << output_labels[i] << "\n";
+    }
+
+    out.close();
+    
     return 0;
 }
