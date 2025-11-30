@@ -43,7 +43,7 @@ std::vector<int> k_means(const Eigen::MatrixXd& matrix, int k, int max_iters) {
         }
 
         for (int j = 0; j < k; ++j) {
-            if(count[j] > 1) {
+            if (count[j] > 1) {
                 new_centroids.row(j) /= static_cast<double>(count[j]);
             }
         }
