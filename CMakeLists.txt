@@ -9,7 +9,7 @@ include_directories(${PROJECT_SOURCE_DIR}/include)
 # Eigen
 add_library(Eigen5 INTERFACE)
 target_include_directories(Eigen5 INTERFACE
-    ${PROJECT_SOURCE_DIR}/lib/eigen-5.0.1
+    ${PROJECT_SOURCE_DIR}/external/eigen-5.0.1
 )
 
 # MPI
