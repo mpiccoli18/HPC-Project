@@ -20,6 +20,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin)
 
 set(SOURCES
     src/main.cpp
+    src/csv.cpp
     src/spectral_clustering.cpp
     src/k_means.cpp
 )
