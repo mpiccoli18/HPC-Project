@@ -1,3 +1,5 @@
+#include "spectral_clustering.hpp"
+
 #include "k_means.hpp"
 
 /*
@@ -26,7 +28,7 @@ Eigen::MatrixXd gaussian_similarity_matrix(const Eigen::MatrixXd& matrix, double
     return similarity_matrix;
 }
 
-std::vector<int> spectral_clustering(const Eigen::MatrixXd& matrix, int k, double sigma = 1.0) {
+std::vector<int> spectral_clustering(const Eigen::MatrixXd& matrix, int k, double sigma) {
     int n = matrix.rows();
     Eigen::MatrixXd similarity_matrix = gaussian_similarity_matrix(matrix, sigma);
 
