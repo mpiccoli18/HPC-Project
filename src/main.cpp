@@ -3,7 +3,7 @@
 #include <string>
 #include <algorithm>
 #include <filesystem>
-#include <mpi/mpi.h>
+#include <mpi.h>
 #include <Eigen/Dense>
 
 #include "csv.hpp"
