@@ -1,5 +1,9 @@
 #include "k_means.hpp"
 
+#include <random>
+#include <limits>
+#include <cmath>
+
 Eigen::MatrixXd init_centroids(const Eigen::MatrixXd& matrix, int k) {
     Eigen::MatrixXd centroids(k, matrix.cols());
 
