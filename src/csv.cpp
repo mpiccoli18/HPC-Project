@@ -9,8 +9,6 @@ bool load_csv(const std::string& path, Eigen::MatrixXd& data, std::vector<int>& 
     std::ifstream ifs(path);
 
     if (!ifs.is_open()) {
-        std::cerr << "Error: cannot open input file!" << path << std::endl;
-
         return false;
     }
 
