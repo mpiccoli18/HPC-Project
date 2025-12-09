@@ -41,7 +41,8 @@ int main(int argc, char** argv)
         size_t start_index = file_path.find_last_of('/') + 1;
         size_t last_index = file_path.find_last_of('.');
         std::string file_name = file_path.substr(start_index, last_index - start_index);
-        std::string output_path = "data/output/" + file_name + "_clustered.csv";
+        std::string output_path = "hpc-project/data/output/" + file_name + "_clustered.csv";
+        std::filesystem::create_directories(output_path);
         
         save_csv(output_path, X, labels);
     }
