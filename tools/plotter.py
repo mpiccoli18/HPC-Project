@@ -15,17 +15,34 @@ def parse_points(file) -> np.ndarray:
 
 
 def plot_points(points: np.ndarray):
-    coords = points[:, :3]
-    labels = points[:, 3]
+    coords = points[:, :3].astype(float)
+    labels = points[:, 3].astype(float)
 
-    plotter = pv.Plotter()
-    plotter.add_points(
-        coords,
-        scalars=labels,
-        render_points_as_spheres=True,
-        point_size=6
+    cloud = pv.PolyData(coords)
+    cloud["labels"] = labels
+    print(f"Coords shape: {coords.shape}") # Should be (Number, 3)
+
+    sphere_geom = pv.Sphere(radius=0.15) # Adjust radius based on your data scale
+    geom_points = cloud.glyph(geom=sphere_geom, scale=False)
+
+    plotter = pv.Plotter(off_screen=True)
+    plotter.set_background("white")
+    plotter.add_mesh(
+        geom_points,
+        scalars="labels",
+        cmap="jet",
+        smooth_shading=True
     )
-    plotter.show()
+
+    plotter.add_axes()
+    plotter.camera_set = True
+    plotter.reset_camera()
+
+    print(f"Data range: {coords.min(axis=0)} to {coords.max(axis=0)}")
+    print(f"Plotter bounds: {plotter.bounds}")
+
+    plotter.screenshot("plot2.png", transparent_background=True)
+    plotter.close()
 
 
 def main():
@@ -43,8 +60,8 @@ def main():
 
     with open(pargs.input_file, 'r') as file:
         points = parse_points(file)
+        print("Opened file: %s", file)
         plot_points(points)
-
 
 if __name__ == '__main__':
     main()
