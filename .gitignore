@@ -8,6 +8,7 @@ cmake_install.cmake
 
 *.exe
 *.out
+sync_to_hpc.sh
 
 .vscode/
 .idea/

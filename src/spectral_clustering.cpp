@@ -1,58 +1,54 @@
 #include "spectral_clustering.hpp"
 
+#include "similarity_matrix.hpp"
 #include "k_means.hpp"
 
-/*
-    Computes the similarity matrix for a given matrix of size n x d.
-    Each entry (i, j) of the similarity matrix represents a similarity score for point i and point j of the input matrix;
-    similarity 1 means the points are identical, while similarity 0 means the points are far away.
-    The diagonal is set to 0, for the sake of graph Laplacians.
-    The sigma parameter controls the width of the Gaussian.
-*/
-Eigen::MatrixXd gaussian_similarity_matrix(const Eigen::MatrixXd& matrix, double sigma) {
-    int n = matrix.rows();
-    Eigen::MatrixXd similarity_matrix = Eigen::MatrixXd::Zero(n, n);
+#include <algorithm>
 
-    double denominator = 2 * sigma * sigma;
+void spectral_clustering(Matrix& X, int k, std::vector<int>& output_labels, double sigma) {
+    int world_rank;
+    int world_size;
+    MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
+    MPI_Comm_size(MPI_COMM_WORLD, &world_size);
 
-    for (int i = 0; i < n; ++i) {
-        for (int j = i + 1; j < n; ++j) {
-            double squared_euclidean_distance = (matrix.row(i) - matrix.row(j)).squaredNorm();
-            double similarity = exp(-squared_euclidean_distance / denominator);
-            
-            similarity_matrix(i, j) = similarity;
-            similarity_matrix(j, i) = similarity;
+    int n = X.rows();
+    int count = n / world_size;
+    int l = count * world_rank;
+    int r = count * (world_rank + 1);
+
+    std::vector<double> similarity_values_slice = gaussian_similarity_values_slice(X, l, r, sigma);
+
+    if (world_rank != 0) {
+        MPI_Gather(similarity_values_slice.data(), similarity_values_slice.size(), MPI_DOUBLE, nullptr, 0, MPI_DOUBLE, 0, MPI_COMM_WORLD); 
+        MPI_Barrier(MPI_COMM_WORLD);
+    } else {
+        double similarity_values[n * n];
+        MPI_Gather(similarity_values_slice.data(), similarity_values_slice.size(), MPI_DOUBLE, similarity_values, n * n, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+        Matrix similarity_matrix = Eigen::Map<Matrix>(similarity_values, n, n);
+        MPI_Barrier(MPI_COMM_WORLD);
+    
+        // diagonal matrix
+        Eigen::VectorXd degrees = similarity_matrix.rowwise().sum();
+        Matrix diagonal_matrix = Matrix::Zero(n, n);
+
+        for (int i = 0; i < n; ++i) {
+            if (degrees(i) > 1e-12) {
+                diagonal_matrix(i, i) = 1.0 / sqrt(degrees(i));
+            }
         }
-    }
 
-    return similarity_matrix;
-}
+        // normalized graph Laplacian
+        Matrix L = Matrix::Identity(n, n) - diagonal_matrix * similarity_matrix * diagonal_matrix;
 
-std::vector<int> spectral_clustering(const Eigen::MatrixXd& matrix, int k, double sigma) {
-    int n = matrix.rows();
-    Eigen::MatrixXd similarity_matrix = gaussian_similarity_matrix(matrix, sigma);
+        // eigen decomposition
+        Eigen::SelfAdjointEigenSolver<Matrix> solver(L);
+        Matrix eigenvectors = solver.eigenvectors().leftCols(k);
 
-    // diagonal matrix
-    Eigen::VectorXd degrees = similarity_matrix.rowwise().sum();
-    Eigen::MatrixXd diagonal_matrix = Eigen::MatrixXd::Zero(n, n);
-
-    for (int i = 0; i < n; ++i) {
-        if (degrees(i) > 1e-12) {
-            diagonal_matrix(i, i) = 1.0 / sqrt(degrees(i));
+        // normalize rows
+        for (int i = 0; i < n; ++i) {
+            eigenvectors.row(i).normalize();
         }
+
+        output_labels = k_means(eigenvectors, k);
     }
-
-    // normalized graph Laplacian
-    Eigen::MatrixXd L = Eigen::MatrixXd::Identity(n, n) - diagonal_matrix * similarity_matrix * diagonal_matrix;
-
-    // eigen decomposition
-    Eigen::SelfAdjointEigenSolver<Eigen::MatrixXd> solver(L);
-    Eigen::MatrixXd eigenvectors = solver.eigenvectors().leftCols(k);
-
-    // normalize rows
-    for (int i = 0; i < n; ++i) {
-        eigenvectors.row(i).normalize();
-    }
-
-    return k_means(eigenvectors, k);
 }

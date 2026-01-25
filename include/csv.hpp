@@ -1,12 +1,13 @@
 #ifndef CSV_HPP
 #define CSV_HPP
 
+#include "common.hpp"
+
 #include <string>
 #include <vector>
-#include <Eigen/Dense>
 
-bool load_csv(const std::string& path, Eigen::MatrixXd& data, std::vector<int>& labels);
+bool load_csv(const std::string& path, Matrix& data, std::vector<int>& labels);
 
-bool save_csv(const std::string& path, const Eigen::MatrixXd& data, const std::vector<int>& labels);
+bool save_csv(const std::string& path, const Matrix& data, const std::vector<int>& labels);
 
 #endif

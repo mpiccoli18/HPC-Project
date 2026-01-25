@@ -1,9 +1,11 @@
 #ifndef SPECTRAL_CLUSTERING_HPP
 #define SPECTRAL_CLUSTERING_HPP
 
-#include <vector>
-#include <Eigen/Dense>
+#include "common.hpp"
 
-std::vector<int> spectral_clustering(const Eigen::MatrixXd& X, int k, double sigma = 1.0);
+#include <vector>
+#include <memory>
+
+void spectral_clustering(Matrix& X, int k, std::vector<int>& output_labels, double sigma = 1.0);
 
 #endif

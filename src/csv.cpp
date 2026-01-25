@@ -5,7 +5,7 @@
 #include <sstream>
 #include <filesystem>
 
-bool load_csv(const std::string& path, Eigen::MatrixXd& data, std::vector<int>& labels) {
+bool load_csv(const std::string& path, Matrix& data, std::vector<int>& labels) {
     std::ifstream ifs(path);
 
     if (!ifs.is_open()) {
@@ -40,7 +40,7 @@ bool load_csv(const std::string& path, Eigen::MatrixXd& data, std::vector<int>& 
     return true;
 }
 
-bool save_csv(const std::string& path, const Eigen::MatrixXd& data, const std::vector<int>& labels) {
+bool save_csv(const std::string& path, const Matrix& data, const std::vector<int>& labels) {
     std::ofstream ofs(path);
 
     if (!ofs.is_open()) {
