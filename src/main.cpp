@@ -3,7 +3,6 @@
 #include <string>
 #include <algorithm>
 #include <filesystem>
-#include <mpi.h>
 
 #include "common.hpp"
 #include "csv.hpp"
@@ -12,6 +11,7 @@
 int main(int argc, char** argv) 
 {
     MPI_Init(&argc, &argv);
+    Eigen::setNbThreads(omp_get_max_threads());
 
     int world_rank;
     int world_size;
@@ -55,8 +55,7 @@ int main(int argc, char** argv)
         X = Eigen::Map<Matrix>(buffer, rows, cols);
     }
     
-    std::vector<int> output_labels;
-    spectral_clustering(X, max_label + 1, output_labels);
+    std::vector<int> output_labels = spectral_clustering(X, max_label + 1);
 
     if (world_rank == 0) {        
         if (!save_csv(output_path, X, output_labels)) {

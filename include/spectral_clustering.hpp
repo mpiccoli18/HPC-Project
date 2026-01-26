@@ -6,6 +6,6 @@
 #include <vector>
 #include <memory>
 
-void spectral_clustering(Matrix& X, int k, std::vector<int>& output_labels, double sigma = 1.0);
+std::vector<int> spectral_clustering(Matrix& X, int k, double sigma = 1.0);
 
 #endif

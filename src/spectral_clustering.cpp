@@ -5,26 +5,36 @@
 
 #include <algorithm>
 
-void spectral_clustering(Matrix& X, int k, std::vector<int>& output_labels, double sigma) {
+std::vector<int> spectral_clustering(Matrix& X, int k, double sigma) {
     int world_rank;
     int world_size;
     MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
     MPI_Comm_size(MPI_COMM_WORLD, &world_size);
 
     int n = X.rows();
-    int count = n / world_size;
-    int l = count * world_rank;
-    int r = count * (world_rank + 1);
+    int count = n / world_size; // number of rows for each process
+    int l = count * world_rank; // index of the local begin row
+    int r = count * (world_rank + 1); // index of the local end row
 
-    std::vector<double> local_similarity_values = gaussian_similarity_values(X, l, r, sigma);
+    std::vector<double> local_similarity_values = evaluate_gaussian_similarity_values(X, l, r, sigma);
+    Matrix local_eigenvectors = Matrix::Zero(n, k);
 
     if (world_rank != 0) {
+        // similarity matrix
         MPI_Gather(local_similarity_values.data(), n * count, MPI_DOUBLE, nullptr, 0, MPI_DOUBLE, 0, MPI_COMM_WORLD); 
 
+        // diagonal matrix
         Eigen::VectorXd degrees = Eigen::VectorXd::Zero(n);    
         MPI_Bcast(degrees.data(), degrees.size(), MPI_DOUBLE, 0, MPI_COMM_WORLD);
-        std::vector<double> local_diagonal_values = diagonal_matrix_values(degrees, l, r);
-        MPI_Gather(local_diagonal_values.data(), n * count, MPI_DOUBLE, nullptr, 0, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+        std::vector<double> local_diagonal_values = evaluate_diagonal_values(degrees, l, r);
+        MPI_Gather(local_diagonal_values.data(), count, MPI_DOUBLE, nullptr, 0, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+        
+        // eigenvectors normalization
+        MPI_Barrier(MPI_COMM_WORLD);
+        Matrix local_eigenvectors = Matrix::Zero(n, k);
+        MPI_Scatter(nullptr, 0, MPI_DOUBLE, local_eigenvectors.data(), count * k, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+        normalize_eigenvectors(local_eigenvectors);
+        MPI_Gather(local_eigenvectors.data(), count * k, MPI_DOUBLE, nullptr, 0, MPI_DOUBLE, 0, MPI_COMM_WORLD);
     } else {
         // similarity matrix
         std::vector<double> global_similarity_values(n * n);
@@ -34,26 +44,28 @@ void spectral_clustering(Matrix& X, int k, std::vector<int>& output_labels, doub
         // diagonal matrix
         Eigen::VectorXd degrees = similarity_matrix.rowwise().sum();
         MPI_Bcast(degrees.data(), degrees.size(), MPI_DOUBLE, 0, MPI_COMM_WORLD);
-        std::vector<double> local_diagonal_values = diagonal_matrix_values(degrees, l, r);
+        std::vector<double> local_diagonal_values = evaluate_diagonal_values(degrees, l, r);
 
-        std::vector<double> global_diagonal_values(n * n);
-        MPI_Gather(local_diagonal_values.data(), n * count, MPI_DOUBLE, global_diagonal_values.data(), n * count, MPI_DOUBLE, 0, MPI_COMM_WORLD);
-        Matrix diagonal_matrix = Eigen::Map<Matrix>(global_diagonal_values.data(), n, n);
+        std::vector<double> global_diagonal_values(n);
+        MPI_Gather(local_diagonal_values.data(), count, MPI_DOUBLE, global_diagonal_values.data(), count, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+        Eigen::VectorXd diagonal_vector = Eigen::Map<Eigen::VectorXd>(global_diagonal_values.data(), n);
 
         // normalized graph Laplacian
-        Matrix L = similarity_matrix;
-        L = diagonal_matrix.asDiagonal() * L * diagonal_matrix.asDiagonal();
+        Matrix L = diagonal_vector.asDiagonal() * similarity_matrix * diagonal_vector.asDiagonal();
         L = Matrix::Identity(n, n) - L;
 
         // eigen decomposition
         Eigen::SelfAdjointEigenSolver<Matrix> solver(L);
-        Matrix eigenvectors = solver.eigenvectors().leftCols(k);
+        Matrix global_eigenvectors = solver.eigenvectors().leftCols(k);
+        
+        // eigenvectors normalization
+        MPI_Barrier(MPI_COMM_WORLD);
+        MPI_Scatter(global_eigenvectors.data(), count * k, MPI_DOUBLE, local_eigenvectors.data(), count * k, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+        normalize_eigenvectors(local_eigenvectors);
+        MPI_Gather(local_eigenvectors.data(), count * k, MPI_DOUBLE, global_eigenvectors.data(), count * k, MPI_DOUBLE, 0, MPI_COMM_WORLD);
 
-        // normalize rows
-        for (int i = 0; i < n; ++i) {
-            eigenvectors.row(i).normalize();
-        }
-
-        output_labels = k_means(eigenvectors, k);
+        return k_means(global_eigenvectors, k);
     }
+
+    return {};
 }
