@@ -1,4 +1,4 @@
-#include "../../include/csv.hpp"
+#include "../include/csv.hpp"
 
 bool load_csv(const std::string& path, Matrix& data, std::vector<int>& labels) {
     std::ifstream ifs(path);

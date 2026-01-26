@@ -1,6 +1,8 @@
 #ifndef COMMON_HPP
 #define COMMON_HPP
 
+#include <string>
+#include <algorithm>
 #include <mpi.h>
 #include <omp.h>
 #include <vector>

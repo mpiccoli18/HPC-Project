@@ -1,7 +1,6 @@
-#include "../../include/spectral_clustering.hpp"
-
-#include "../../include/similarity_matrix.hpp"
-#include "../../include/k_means.hpp"
+#include "../include/spectral_clustering.hpp"
+#include "../include/similarity_matrix.hpp"
+#include "../include/k_means.hpp"
 
 std::vector<int> spectral_clustering(Matrix& X, int k, double sigma) {
     int world_rank;

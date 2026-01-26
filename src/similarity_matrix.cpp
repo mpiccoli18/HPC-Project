@@ -1,5 +1,5 @@
-#include "../../include/common.hpp"
-#include "../../include/similarity_matrix.hpp"
+#include "../include/common.hpp"
+#include "../include/similarity_matrix.hpp"
 /*
     Computes the similarity matrix for a given matrix of size n x d.
     Each entry (i, j) of the similarity matrix represents a similarity score for point i and point j of the input matrix;
