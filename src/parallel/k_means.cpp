@@ -1,10 +1,6 @@
-#include "k_means.hpp"
+#include "../../include/k_means.hpp"
 
-#include "similarity_matrix.hpp"
-
-#include <random>
-#include <limits>
-#include <cmath>
+#include "../../include/similarity_matrix.hpp"
 
 Matrix init_centroids(const Matrix& X, int k) {
     Matrix centroids(k, X.cols());

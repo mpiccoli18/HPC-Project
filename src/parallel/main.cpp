@@ -1,12 +1,9 @@
-#include <vector>
-#include <iostream>
 #include <string>
 #include <algorithm>
-#include <filesystem>
 
-#include "common.hpp"
-#include "csv.hpp"
-#include "spectral_clustering.hpp"
+#include "../../include/common.hpp"
+#include "../../include/csv.hpp"
+#include "../../include/spectral_clustering.hpp"
 
 int main(int argc, char** argv) 
 {

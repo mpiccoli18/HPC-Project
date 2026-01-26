@@ -1,12 +1,13 @@
 # Compiler
-CXX = g++
-CXXFLAGS = -Wall -Wextra -std=c++20
-TARGET = bin/spectral_clustering
+CXX = g++-9.1.0
+CXXFLAGS = -Wall -Wextra -std=c++17
+TARGET = bin/spectral_serial
 
 #Files
-SRCS := src/main.cpp \
-		src/k_means.cpp \
-		src/spectral_clustering.cpp
+SRCS := src/serial/main.cpp \
+		src/serial/k_means.cpp \
+		src/serial/csv.cpp \
+		src/serial/spectral_clustering.cpp
 
 OBJS := $(SRCS:.cpp=.o)
 
@@ -28,5 +29,6 @@ clean:
 	rm -f $(OBJS) $(TARGET)
 
 
-main.o: include/spectral_clustering.hpp
+main.o: include/spectral_clustering.hpp \
+		
 spectral_clustering.o: include/k_means.hpp

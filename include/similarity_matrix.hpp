@@ -3,7 +3,6 @@
 
 #include "common.hpp"
 
-#include <vector>
 
 /*
     Computes the similarity matrix for a given matrix of size n x d.

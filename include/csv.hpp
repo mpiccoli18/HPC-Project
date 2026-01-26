@@ -2,9 +2,10 @@
 #define CSV_HPP
 
 #include "common.hpp"
-
+#include <fstream>
+#include <sstream>
+#include <filesystem>
 #include <string>
-#include <vector>
 
 bool load_csv(const std::string& path, Matrix& data, std::vector<int>& labels);
 
