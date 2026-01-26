@@ -11,7 +11,7 @@ nmi_results = []
 ari_results = []
 
 for n in numbers:
-    pred_data = pd.read_csv(f'./data/output/test_1000_{n}_clustered.csv')
+    pred_data = pd.read_csv(f'./data/accuracy/test_1000_{n}_clustered.csv')
     y_pred = pred_data['label'].values
     
     # Calculate Metrics
