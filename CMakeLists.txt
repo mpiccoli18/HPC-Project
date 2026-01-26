@@ -22,11 +22,11 @@ find_package(OpenMP REQUIRED)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin)
 
 set(SOURCES
-        src/parallel/csv.cpp
-        src/parallel/k_means.cpp
-        src/parallel/main.cpp
-        src/parallel/similarity_matrix.cpp
-        src/parallel/spectral_clustering.cpp
+        src/csv.cpp
+        src/k_means.cpp
+        src/main.cpp
+        src/similarity_matrix.cpp
+        src/spectral_clustering.cpp
 )
 
 add_executable(spectral_clustering ${SOURCES})
