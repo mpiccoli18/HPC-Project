@@ -3,10 +3,9 @@
 #include <string>
 #include <algorithm>
 #include <filesystem>
-#include <Eigen/Dense>
 
-#include "csv.hpp"
-#include "spectral_clustering.hpp"
+#include "../include/csv.hpp"
+#include "../include/spectral_clustering.hpp"
 
 int main(int argc, char** argv) 
 {
@@ -32,8 +31,8 @@ int main(int argc, char** argv)
     size_t start_index = file_path.find_last_of('/') + 1;
     size_t last_index = file_path.find_last_of('.');
     std::string file_name = file_path.substr(start_index, last_index - start_index);
-    std::string output_path = "hpc-project/data/output/" + file_name + "_clustered.csv";
-    std::filesystem::create_directories(output_path);
+    std::string output_path = "./data/output/" + file_name + "_4_clustered.csv";
+    //std::filesystem::create_directories(output_path);
     
     save_csv(output_path, X, labels);
 

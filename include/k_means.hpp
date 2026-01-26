@@ -2,7 +2,7 @@
 #define K_MEANS_HPP
 
 #include <vector>
-#include <Eigen/Dense>
+#include "../external/eigen-5.0.1/Eigen/Dense"
 
 std::vector<int> k_means(const Eigen::MatrixXd& matrix, int k, int max_iters = 100);
 

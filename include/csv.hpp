@@ -3,7 +3,7 @@
 
 #include <string>
 #include <vector>
-#include <Eigen/Dense>
+#include "../external/eigen-5.0.1/Eigen/Dense"
 
 bool load_csv(const std::string& path, Eigen::MatrixXd& data, std::vector<int>& labels);
 
