@@ -11,7 +11,7 @@
 */
 
 std::vector<double> evaluate_gaussian_similarity_values(const Matrix& X, int l, int r, double sigma) {
-    std::vector<double> ret;
+    std::vector<double> similarity_values;
     
     const double denominator = 2 * sigma * sigma;
 
@@ -20,30 +20,54 @@ std::vector<double> evaluate_gaussian_similarity_values(const Matrix& X, int l, 
             if (i != j) {
                 double squared_euclidean_distance = (X.row(i) - X.row(j)).squaredNorm();
                 double similarity = exp(-squared_euclidean_distance / denominator);
-                ret.push_back(similarity);
+                similarity_values.push_back(similarity);
             } else {
-                ret.push_back(0.0);
+                similarity_values.push_back(0.0);
             }
         }
     }
 
-    return ret;
+    return similarity_values;
 }
 
 std::vector<double> evaluate_diagonal_values(const Eigen::VectorXd& degrees, int l, int r) {
-    std::vector<double> ret;
+    std::vector<double> diagonal_values;
 
     for (int i = l; i < r; ++i) {
         if (degrees(i) > 1e-12) {
-            ret.push_back(1.0 / sqrt(degrees(i)));
+            diagonal_values.push_back(1.0 / sqrt(degrees(i)));
+        } else {
+            diagonal_values.push_back(0.0);
         }
     }
 
-    return ret;
+    return diagonal_values;
 }
 
 void normalize_eigenvectors(Matrix& X) {
     for (int i = 0; i < X.rows(); ++i) {
         X.row(i).normalize();
     }
+}
+
+std::vector<int> evaluate_k_means_labels(const Matrix& X, const Matrix& centroids, int l, int r) {
+    std::vector<int> labels;
+
+    for (int i = l; i < r; ++i) {
+        double min_distance = std::numeric_limits<double>::max();
+        int label = -1;
+
+        for (int j = 0; j < centroids.rows(); ++j) {
+            double distance = (X.row(i) - centroids.row(j)).squaredNorm();
+
+            if (distance < min_distance) {
+                min_distance = distance;
+                label = j;
+            }
+        }
+
+        labels.push_back(label);
+    }
+
+    return labels;
 }

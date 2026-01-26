@@ -1,9 +1,10 @@
 #ifndef K_MEANS_HPP
 #define K_MEANS_HPP
 
-#include <vector>
-#include <Eigen/Dense>
+#include "common.hpp"
 
-std::vector<int> k_means(const Eigen::MatrixXd& matrix, int k, int max_iters = 100);
+#include <vector>
+
+std::vector<int> k_means(const Matrix& X, int k, int max_iters = 100000);
 
 #endif

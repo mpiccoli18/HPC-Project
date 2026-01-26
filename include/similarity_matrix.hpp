@@ -19,4 +19,6 @@ std::vector<double> evaluate_diagonal_values(const Eigen::VectorXd& degrees, int
 
 void normalize_eigenvectors(Matrix& X);
 
+std::vector<int> evaluate_k_means_labels(const Matrix& X, const Matrix& centroids, int l, int r);
+
 #endif
