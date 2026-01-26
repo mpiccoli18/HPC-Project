@@ -4,6 +4,6 @@
 #include <vector>
 #include "../external/eigen-5.0.1/Eigen/Dense"
 
-std::vector<int> spectral_clustering(const Eigen::MatrixXd& X, int k, double sigma = 10.0);
+std::vector<int> spectral_clustering(const Eigen::MatrixXd& X, int k, double sigma = 1.0);
 
 #endif

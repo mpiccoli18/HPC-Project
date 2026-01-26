@@ -19,10 +19,10 @@ include_directories(${MPI_CXX_INCLUDE_PATH})
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin)
 
 set(SOURCES
-    src/main.cpp
-    src/csv.cpp
-    src/spectral_clustering.cpp
-    src/k_means.cpp
+        src/serial/main.cpp
+        src/serial/csv.cpp
+        src/serial/spectral_clustering.cpp
+        src/serial/k_means.cpp
 )
 
 add_executable(spectral_clustering ${SOURCES})
