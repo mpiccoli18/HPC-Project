@@ -4,8 +4,8 @@
 #include <algorithm>
 #include <filesystem>
 
-#include "../../include/csv.hpp"
-#include "../../include/spectral_clustering.hpp"
+#include "../include/csv.hpp"
+#include "../include/spectral_clustering.hpp"
 
 int main(int argc, char** argv) 
 {
