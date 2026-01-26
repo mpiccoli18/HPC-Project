@@ -4,7 +4,7 @@ CXXFLAGS = -O3 -std=c++17 -fopenmp -I./include -I/apps/openmpi-3.0.0/include -pt
 TARGET = bin/spectral_parallel
 
 #Linking
-LDFLAGS = -fopenmp
+LDFLAGS = -std=c++17 -fopenmp
 
 #Files
 SRCS := src/parallel/main.cpp \
@@ -20,7 +20,8 @@ OBJS := $(SRCS:.cpp=.o)
 run: $(TARGET)
 $(TARGET): $(OBJS)
 	@echo "Linking executable: $@"
-	$(CXX) $(OBJS) -o $(TARGET) $(LDFLAGS) $@
+	@mkdir -p bin
+	mpicxx $(OBJS) -o $(TARGET) $(LDFLAGS)
 %.o: %.cpp
 	@echo "Compiling $< to $@!"
 	$(CXX) $(CXXFLAGS) -c $< -o $@
