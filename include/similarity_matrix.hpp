@@ -13,6 +13,8 @@
     The sigma parameter controls the width of the Gaussian.
 */
 
-std::vector<double> gaussian_similarity_values_slice(Matrix& M, int l, int r, double sigma);
+std::vector<double> gaussian_similarity_values(const Matrix& X, int l, int r, double sigma);
+
+std::vector<double> diagonal_matrix_values(const Eigen::VectorXd& degrees, int l, int r);
 
 #endif

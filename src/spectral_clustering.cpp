@@ -16,29 +16,34 @@ void spectral_clustering(Matrix& X, int k, std::vector<int>& output_labels, doub
     int l = count * world_rank;
     int r = count * (world_rank + 1);
 
-    std::vector<double> similarity_values_slice = gaussian_similarity_values_slice(X, l, r, sigma);
+    std::vector<double> local_similarity_values = gaussian_similarity_values(X, l, r, sigma);
 
     if (world_rank != 0) {
-        MPI_Gather(similarity_values_slice.data(), similarity_values_slice.size(), MPI_DOUBLE, nullptr, 0, MPI_DOUBLE, 0, MPI_COMM_WORLD); 
-        MPI_Barrier(MPI_COMM_WORLD);
+        MPI_Gather(local_similarity_values.data(), n * count, MPI_DOUBLE, nullptr, 0, MPI_DOUBLE, 0, MPI_COMM_WORLD); 
+
+        Eigen::VectorXd degrees = Eigen::VectorXd::Zero(n);    
+        MPI_Bcast(degrees.data(), degrees.size(), MPI_DOUBLE, 0, MPI_COMM_WORLD);
+        std::vector<double> local_diagonal_values = diagonal_matrix_values(degrees, l, r);
+        MPI_Gather(local_diagonal_values.data(), n * count, MPI_DOUBLE, nullptr, 0, MPI_DOUBLE, 0, MPI_COMM_WORLD);
     } else {
-        double similarity_values[n * n];
-        MPI_Gather(similarity_values_slice.data(), similarity_values_slice.size(), MPI_DOUBLE, similarity_values, n * n, MPI_DOUBLE, 0, MPI_COMM_WORLD);
-        Matrix similarity_matrix = Eigen::Map<Matrix>(similarity_values, n, n);
-        MPI_Barrier(MPI_COMM_WORLD);
+        // similarity matrix
+        std::vector<double> global_similarity_values(n * n);
+        MPI_Gather(local_similarity_values.data(), n * count, MPI_DOUBLE, global_similarity_values.data(), n * count, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+        Matrix similarity_matrix = Eigen::Map<Matrix>(global_similarity_values.data(), n, n);
     
         // diagonal matrix
         Eigen::VectorXd degrees = similarity_matrix.rowwise().sum();
-        Matrix diagonal_matrix = Matrix::Zero(n, n);
+        MPI_Bcast(degrees.data(), degrees.size(), MPI_DOUBLE, 0, MPI_COMM_WORLD);
+        std::vector<double> local_diagonal_values = diagonal_matrix_values(degrees, l, r);
 
-        for (int i = 0; i < n; ++i) {
-            if (degrees(i) > 1e-12) {
-                diagonal_matrix(i, i) = 1.0 / sqrt(degrees(i));
-            }
-        }
+        std::vector<double> global_diagonal_values(n * n);
+        MPI_Gather(local_diagonal_values.data(), n * count, MPI_DOUBLE, global_diagonal_values.data(), n * count, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+        Matrix diagonal_matrix = Eigen::Map<Matrix>(global_diagonal_values.data(), n, n);
 
         // normalized graph Laplacian
-        Matrix L = Matrix::Identity(n, n) - diagonal_matrix * similarity_matrix * diagonal_matrix;
+        Matrix L = similarity_matrix;
+        L = diagonal_matrix.asDiagonal() * L * diagonal_matrix.asDiagonal();
+        L = Matrix::Identity(n, n) - L;
 
         // eigen decomposition
         Eigen::SelfAdjointEigenSolver<Matrix> solver(L);

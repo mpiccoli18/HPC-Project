@@ -44,8 +44,6 @@ bool save_csv(const std::string& path, const Matrix& data, const std::vector<int
     std::ofstream ofs(path);
 
     if (!ofs.is_open()) {
-        std::cerr << "Error: cannot open output file!" << path << std::endl;
-
         return false;
     }
 

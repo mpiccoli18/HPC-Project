@@ -18,7 +18,8 @@ int main(int argc, char** argv)
     MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
     MPI_Comm_size(MPI_COMM_WORLD, &world_size);
 
-    const std::string file_path = argv[1];
+    const std::string input_path = argv[1];
+    const std::string output_path = argv[2];
 
     Matrix X;
     int rows = 0, cols = 0;
@@ -26,13 +27,12 @@ int main(int argc, char** argv)
     int max_label = 0;
 
     if (world_rank == 0) {
-        if (argc < 2) {
-            std::cerr << "Usage: ./program input_file.csv" << std::endl;
+        if (argc < 3) {
+            std::cerr << "Usage: ./program input_file.csv output_file.csv" << std::endl;
             return 1;
         }
 
-
-        if (!load_csv(file_path, X, labels)) {
+        if (!load_csv(input_path, X, labels)) {
             std::cerr << "Error: cannot open input file at path " << argv[1] << std::endl;
             return 1;
         }
@@ -58,13 +58,11 @@ int main(int argc, char** argv)
     std::vector<int> output_labels;
     spectral_clustering(X, max_label + 1, output_labels);
 
-    if (world_rank == 0) {
-        size_t start_index = file_path.find_last_of('/') + 1;
-        size_t last_index = file_path.find_last_of('.');
-        std::string file_name = file_path.substr(start_index, last_index - start_index);
-        std::string output_path = "./hpc-project/data/output/" + file_name + "_clustered.csv";
-        
-        save_csv(output_path, X, labels);
+    if (world_rank == 0) {        
+        if (!save_csv(output_path, X, output_labels)) {
+            std::cerr << "Error: cannot open output file at path " << output_path << std::endl;
+            return 1;
+        }
     }
 
     MPI_Finalize();
