@@ -1,6 +1,6 @@
 #!/bin/bash
 #PBS -l select=4:ncpus=8:mem=2gb -l place=scatter
-#PBS -l walltime=0:30:00
+#PBS -l walltime=1:15:00
 #PBS -q short_cpuQ
 
 
@@ -22,4 +22,4 @@ hostname
 mpiexec --mca mpi_cuda_support 0 \
         --mca btl ^openib \
         --mca oob ^ud \
-        -n 4 ./bin/spectral_clustering ./data/input/test_1024.csv ./data/output/test_1024.csv
+        -n 4 ./bin/spectral_clustering ./data/input/test_20000.csv ./data/output/test_20000.csv
