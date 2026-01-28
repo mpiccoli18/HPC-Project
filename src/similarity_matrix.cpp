@@ -1,5 +1,6 @@
 #include "../include/common.hpp"
 #include "../include/similarity_matrix.hpp"
+
 /*
     Computes the similarity matrix for a given matrix of size n x d.
     Each entry (i, j) of the similarity matrix represents a similarity score for point i and point j of the input matrix;
@@ -32,7 +33,7 @@ std::vector<double> evaluate_diagonal_values(const Eigen::VectorXd& degrees, int
     std::vector<double> diagonal_values;
 
     for (int i = l; i < r; ++i) {
-        if (degrees(i) > 1e-12) {
+        if (degrees(i) > 1e-9) {
             diagonal_values.push_back(1.0 / sqrt(degrees(i)));
         } else {
             diagonal_values.push_back(0.0);

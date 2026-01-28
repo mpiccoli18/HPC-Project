@@ -41,12 +41,18 @@ int main(int argc, char** argv)
     MPI_Bcast(&cols, 1, MPI_INT, 0, MPI_COMM_WORLD);
     MPI_Bcast(&max_label, 1, MPI_INT, 0, MPI_COMM_WORLD);
 
-    if (world_rank == 0) {
-        MPI_Bcast(X.data(), X.size(), MPI_DOUBLE, 0, MPI_COMM_WORLD);
-    } else {
-        double buffer[rows * cols];
-        MPI_Bcast(buffer, rows * cols, MPI_DOUBLE, 0, MPI_COMM_WORLD);
-        X = Eigen::Map<Matrix>(buffer, rows, cols);
+    std::vector<double> buffer(rows*cols); //initialize vector after input reading
+    if (world_rank != 0) {
+        X.resize(rows, cols); 
+    }
+
+
+    if(world_rank == 0){
+        std::copy(X.data(), X.data() + X.size(), buffer.begin());
+    } 
+    MPI_Bcast(buffer.data(), rows * cols, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+    if(world_rank != 0){
+        X = Eigen::Map<Matrix>(buffer.data(), rows, cols);
     }
     
     std::vector<int> output_labels = spectral_clustering(X, max_label + 1);
