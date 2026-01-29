@@ -22,4 +22,4 @@ hostname
 mpiexec --mca mpi_cuda_support 0 \
         --mca btl ^openib \
         --mca oob ^ud \
-        -n 4 ./bin/spectral_clustering ./data/input/test_2048.csv ./data/output/test_2048.csv
+        -n 4 ./bin/spectral_clustering ./data/input/test_16384.csv ./data/output/test_16384.csv
