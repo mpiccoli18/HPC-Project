@@ -6,12 +6,18 @@ int main(int argc, char** argv)
 {
     MPI_Init(&argc, &argv);
     Eigen::setNbThreads(omp_get_max_threads());
-
+    
     int world_rank;
     int world_size;
     MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
     MPI_Comm_size(MPI_COMM_WORLD, &world_size);
 
+    if (world_rank == 0) {
+        if (argc < 3) {
+            std::cerr << "Usage: ./program input_file.csv output_file.csv" << std::endl;
+            return 1;
+        }
+    }
     const std::string input_path = argv[1];
     const std::string output_path = argv[2];
 
@@ -21,11 +27,6 @@ int main(int argc, char** argv)
     int max_label = 0;
 
     if (world_rank == 0) {
-        if (argc < 3) {
-            std::cerr << "Usage: ./program input_file.csv output_file.csv" << std::endl;
-            return 1;
-        }
-
         if (!load_csv(input_path, X, labels)) {
             std::cerr << "Error: cannot open input file at path " << argv[1] << std::endl;
             return 1;
