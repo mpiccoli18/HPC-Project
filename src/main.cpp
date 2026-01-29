@@ -5,7 +5,7 @@
 int main(int argc, char** argv) 
 {
     MPI_Init(&argc, &argv);
-    Eigen::setNbThreads(omp_get_max_threads());
+    Eigen::setNbThreads(4);
     
     int world_rank;
     int world_size;
