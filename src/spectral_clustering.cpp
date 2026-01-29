@@ -44,7 +44,9 @@ std::vector<int> spectral_clustering(Matrix& X, int k, double sigma) {
         Matrix L = diagonal_vector.asDiagonal() * (Matrix::Identity(n, n) - (diagonal_vector.asDiagonal() * similarity_matrix * diagonal_vector.asDiagonal()));
 
         // Eigen decomposition: smallest eigenvalues contain clustering info
+        if (world_rank == 0) std::cout << "Starting Eigen Solver..." << std::endl;
         Eigen::SelfAdjointEigenSolver<Matrix> solver(L);
+        if (world_rank == 0) std::cout << "Eigen Solver Finished!" << std::endl;
         global_eigenvectors = solver.eigenvectors().leftCols(k);
     } 
     else{

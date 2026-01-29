@@ -55,9 +55,16 @@ int main(int argc, char** argv)
         X = Eigen::Map<Matrix>(buffer.data(), rows, cols);
     }
     
+    double start_t = MPI_Wtime();   //start the time
+    
     std::vector<int> output_labels = spectral_clustering(X, max_label + 1);
 
-    if (world_rank == 0) {        
+    double end_t = MPI_Wtime();     //stop the time
+    if (world_rank == 0) {
+        std::cout << "Dataset: " << input_path 
+                  << " | Ranks: " << world_size 
+                  << " | Execution Time: " << (end_t - start_t) << "s" 
+                  << std::endl;        
         if (!save_csv(output_path, X, output_labels)) {
             std::cerr << "Error: cannot open output file at path " << output_path << std::endl;
             return 1;

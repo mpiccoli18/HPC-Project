@@ -38,7 +38,9 @@ std::vector<int> k_means(const Matrix& X, int k, int max_iters) {
 
     while(iterating && iter < max_iters)
     {
-        std::cout << iter << std::endl;
+        if (world_rank == 0) {
+            std::cout << "K-Means Iteration: " << iter << std::endl;
+        }
         MPI_Bcast(global_centroids.data(), k * X.cols(), MPI_DOUBLE, 0, MPI_COMM_WORLD); //brodcast current centroids
 
         local_labels = evaluate_k_means_labels(X, global_centroids, l, r);
