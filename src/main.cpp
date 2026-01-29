@@ -3,6 +3,7 @@
 #include <string>
 #include <algorithm>
 #include <filesystem>
+#include <chrono> //for time purposes
 
 #include "../include/csv.hpp"
 #include "../include/spectral_clustering.hpp"
@@ -26,8 +27,16 @@ int main(int argc, char** argv)
 
     int max_label = *std::max_element(labels.begin(), labels.end());
 
+    auto start = std::chrono::high_resolution_clock::now(); //start time
+    
     std::vector<int> output_labels = spectral_clustering(X, max_label + 1);
+    
+    auto end = std::chrono::high_resolution_clock::now();  //end time
+    
+    std::chrono::duration<double> elapsed = end - start;
 
+    std::cout << "Serial Execution Time: " << elapsed.count() << "s" << std::endl;
+    
     size_t start_index = file_path.find_last_of('/') + 1;
     size_t last_index = file_path.find_last_of('.');
     std::string file_name = file_path.substr(start_index, last_index - start_index);
