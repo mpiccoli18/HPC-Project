@@ -10,6 +10,7 @@
 
 int main(int argc, char** argv) 
 {
+    Eigen::setNbThreads(1);
     if (argc < 2) {
         std::cerr << "Usage: ./program input_file.csv" << std::endl;
         return 1;

@@ -32,7 +32,7 @@ std::vector<int> spectral_clustering(const Eigen::MatrixXd& matrix, int k, doubl
     Eigen::MatrixXd similarity_matrix = gaussian_similarity_matrix(matrix, sigma);
 
     // diagonal matrix
-    Eigen::VectorXd degrees = similarity_matrix.rowwise().sum();
+    Eigen::VectorXd degrees = similarity_matrix.colwise().sum().transpose();
     Eigen::MatrixXd diagonal_matrix = Eigen::MatrixXd::Zero(n, n);
 
     for (int i = 0; i < n; ++i) {
