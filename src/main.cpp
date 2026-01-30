@@ -5,7 +5,7 @@
 int main(int argc, char** argv) 
 {
     MPI_Init(&argc, &argv);
-    Eigen::setNbThreads(4);
+    Eigen::setNbThreads(1);
     
     int world_rank;
     int world_size;

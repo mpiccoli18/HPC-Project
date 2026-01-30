@@ -1,5 +1,5 @@
 #!/bin/bash
-#PBS -l select=4:ncpus=8:mem=8gb -l place=scatter
+#PBS -l select=32:ncpus=1:mem=16gb -l place=scatter
 #PBS -l walltime=6:00:00
 #PBS -q short_cpuQ
 
@@ -30,5 +30,5 @@ for data in "${datasets[@]}"; do
     mpiexec --mca mpi_cuda_support 0 \
         --mca btl ^openib \
         --mca oob ^ud \
-        -n 4 ./bin/spectral_clustering "$INPUT_PATH" "$OUTPUT_PATH"
+        -n 32 ./bin/spectral_clustering "$INPUT_PATH" "$OUTPUT_PATH"
 done

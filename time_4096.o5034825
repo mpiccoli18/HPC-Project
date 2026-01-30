@@ -1,8 +1,0 @@
-This job is running on: 
-hpc-c12-node05.unitn.it
-Starting Eigen Solver...
-Eigen Solver Finished!
-K-Means Iteration: 0
-K-Means Iteration: 1
-K-Means Iteration: 2
-Dataset: ./data/input/test_4096.csv | Ranks: 4 | Execution Time: 77.5775s
