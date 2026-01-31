@@ -10,7 +10,6 @@ Matrix init_centroids(const Matrix& X, int k) {
     for (int i = 0; i < k; ++i) {
         centroids.row(i) = X.row(dist(rng));
     }
-
     return centroids;
 }
 
@@ -28,7 +27,7 @@ std::vector<int> k_means(const Matrix& X, int k, int max_iters) {
     int iter = 0;
     int label;
     Matrix local_centroid_sums, next_centroids;     //for calculating the centroids
-    std::vector<int> local_counts(k, 0);
+    
 
     Matrix global_centroids(k, X.cols());
 
@@ -47,10 +46,10 @@ std::vector<int> k_means(const Matrix& X, int k, int max_iters) {
         MPI_Bcast(global_centroids.data(), k * X.cols(), MPI_DOUBLE, 0, MPI_COMM_WORLD); //brodcast current centroids
 
         local_labels = evaluate_k_means_labels(X, global_centroids, l, r);
-        MPI_Gather(local_labels.data(), count, MPI_INT, world_rank == 0 ? global_labels.data() : nullptr, count, MPI_INT, 0, MPI_COMM_WORLD);
 
         // Partial sum calculation
         local_centroid_sums = Matrix::Zero(k, X.cols());
+        std::vector<int> local_counts(k, 0); // ADDED: Reset counts to 0 at start of every iteration
 
         for (int i = 0; i < count; ++i) {
             label = local_labels[i];
@@ -80,7 +79,8 @@ std::vector<int> k_means(const Matrix& X, int k, int max_iters) {
         MPI_Bcast(&iterating, 1, MPI_CXX_BOOL, 0, MPI_COMM_WORLD);   //broadcast loop or not
     }
     
-    MPI_Bcast(global_labels.data(), n, MPI_INT, 0, MPI_COMM_WORLD);
+    // After convergence gather
+    MPI_Gather(local_labels.data(), count, MPI_INT, world_rank == 0 ? global_labels.data() : nullptr, count, MPI_INT, 0, MPI_COMM_WORLD);
 
     return global_labels;
 }

@@ -19,16 +19,16 @@ std::vector<int> spectral_clustering(Matrix& X, int k, double sigma) {
     std::vector<double> local_similarity_values = evaluate_gaussian_similarity_values(X, l, r, sigma);
     Matrix similarity_matrix;
 
+    // Direct gather to Matrix to save memory
     if (world_rank == 0) {
-        // Collect similarity matrix from all workers
-        std::vector<double> global_similarity_values(n * n);
-        MPI_Gather(local_similarity_values.data(), n * count, MPI_DOUBLE, global_similarity_values.data(), n * count, MPI_DOUBLE, 0, MPI_COMM_WORLD);
-        
-        similarity_matrix = Eigen::Map<Matrix>(global_similarity_values.data(), n, n);
+        similarity_matrix.resize(n, n);
+    }
+    
+    MPI_Gather(local_similarity_values.data(), n * count, MPI_DOUBLE, 
+               world_rank == 0 ? similarity_matrix.data() : nullptr, n * count, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+
+    if (world_rank == 0) {
         degrees = similarity_matrix.rowwise().sum();
-    } else {
-        // send local similarity
-        MPI_Gather(local_similarity_values.data(), n * count, MPI_DOUBLE, nullptr, 0, MPI_DOUBLE, 0, MPI_COMM_WORLD);
     }
 
     //broadcast the degree

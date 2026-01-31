@@ -27,7 +27,6 @@ std::vector<double> evaluate_gaussian_similarity_values(const Matrix& X, int l, 
             similarity_values[similarity_index] = exp(-squared_euclidean_distance / denominator);
         }
     }
-
     return similarity_values;
 }
 
@@ -41,7 +40,6 @@ std::vector<double> evaluate_diagonal_values(const Eigen::VectorXd& degrees, int
             diagonal_values.push_back(0.0);
         }
     }
-
     return diagonal_values;
 }
 
@@ -52,10 +50,12 @@ void normalize_eigenvectors(Matrix& X) {
 }
 
 std::vector<int> evaluate_k_means_labels(const Matrix& X, const Matrix& centroids, int l, int r) {
-    std::vector<int> labels;
+    int count = r - l;
+    std::vector<int> labels(count);
     double min_distance, distance;
     int label = -1;
 
+    #pragma omp parallel for private(min_distance, distance, label)
     for (int i = l; i < r; ++i) {
         min_distance = std::numeric_limits<double>::max();
 
@@ -67,9 +67,7 @@ std::vector<int> evaluate_k_means_labels(const Matrix& X, const Matrix& centroid
                 label = j;
             }
         }
-
-        labels.push_back(label);
+        labels[i - l] = label;
     }
-
     return labels;
 }
