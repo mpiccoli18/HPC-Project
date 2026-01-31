@@ -49,27 +49,6 @@ std::vector<int> k_means(const Matrix& X, int k, int max_iters) {
         local_labels = evaluate_k_means_labels(X, global_centroids, l, r);
         MPI_Gather(local_labels.data(), count, MPI_INT, world_rank == 0 ? global_labels.data() : nullptr, count, MPI_INT, 0, MPI_COMM_WORLD);
 
-        /*if(world_rank == 0){
-            Matrix new_centroids = Matrix::Zero(k, X.cols());
-            std::vector<int> counts(k, 0);
-
-            for(int i = 0; i < n; i++){
-                new_centroids.row(global_labels[i]) += X.row(i);
-                counts[global_labels[i]] += 1;
-            }
-
-            for (int j = 0; j < k; ++j) {
-                if (counts[j] > 0) 
-                    new_centroids.row(j) /= static_cast<double>(counts[j]);
-            }
-
-            if ((new_centroids - global_centroids).norm() < 1e-3) { //check convergence
-                iterating = false; 
-            }
-            global_centroids = new_centroids;
-            iter++;
-        }*/
-
         // Partial sum calculation
         local_centroid_sums = Matrix::Zero(k, X.cols());
 

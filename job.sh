@@ -1,5 +1,5 @@
 #!/bin/bash
-#PBS -l select=32:ncpus=1:mem=16gb -l place=scatter
+#PBS -l select=32:ncpus=8:mem=16gb -l place=scatter
 #PBS -l walltime=6:00:00
 #PBS -q short_cpuQ
 

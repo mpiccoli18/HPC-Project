@@ -41,12 +41,22 @@ std::vector<int> spectral_clustering(Matrix& X, int k, double sigma) {
 
     if (world_rank == 0) {
         // normalized Laplacian calculation
-        Matrix L = diagonal_vector.asDiagonal() * (Matrix::Identity(n, n) - similarity_matrix) * diagonal_vector.asDiagonal();
-
-        std::cout << "Starting Eigen Solver..." << std::endl;
-        Eigen::SelfAdjointEigenSolver<Matrix> solver(L);
-        std::cout << "Eigen Solver Finished!" << std::endl;
         
+        Matrix L = diagonal_vector.asDiagonal() * (Matrix::Identity(n, n) - similarity_matrix) * diagonal_vector.asDiagonal();
+        
+        Eigen::setNbThreads(8);
+        
+        std::cout << "Starting Eigen Solver..." << std::endl;
+        
+        double start_t = MPI_Wtime();   //start the time
+        
+        Eigen::SelfAdjointEigenSolver<Matrix> solver(L);
+        
+        double end_t = MPI_Wtime();   //start the time
+        
+        std::cout << "Eigen Solver Finished in " << end_t - start_t << " seconds!" << std::endl;
+        
+        Eigen::setNbThreads(1);
         // Extract the k smallest eigenvectors
         global_eigenvectors = solver.eigenvectors().leftCols(k);
     }
