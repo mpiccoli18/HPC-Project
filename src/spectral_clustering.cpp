@@ -35,34 +35,26 @@ std::vector<int> spectral_clustering(Matrix& X, int k, double sigma) {
     MPI_Bcast(degrees.data(), n, MPI_DOUBLE, 0, MPI_COMM_WORLD);
 
     std::vector<double> local_diagonal_values = evaluate_diagonal_values(degrees, l, r);
-    if(world_rank == 0){
-        std::vector<double> global_diagonal_values(n);
-        MPI_Gather(local_diagonal_values.data(), count, MPI_DOUBLE, global_diagonal_values.data(), count, MPI_DOUBLE, 0, MPI_COMM_WORLD);
-        Eigen::VectorXd diagonal_vector = Eigen::Map<Eigen::VectorXd>(global_diagonal_values.data(), n);
+    Eigen::VectorXd diagonal_vector(n);
+    MPI_Gather(local_diagonal_values.data(), count, MPI_DOUBLE, 
+            diagonal_vector.data(), count, MPI_DOUBLE, 0, MPI_COMM_WORLD);
 
-        // Normalized graph Laplacian calculation
-        Matrix L = diagonal_vector.asDiagonal() * (Matrix::Identity(n, n) - (diagonal_vector.asDiagonal() * similarity_matrix * diagonal_vector.asDiagonal()));
+    if (world_rank == 0) {
+        // normalized Laplacian calculation
+        Matrix L = diagonal_vector.asDiagonal() * (Matrix::Identity(n, n) - similarity_matrix) * diagonal_vector.asDiagonal();
 
-        // Eigen decomposition: smallest eigenvalues contain clustering info
-        if (world_rank == 0) std::cout << "Starting Eigen Solver..." << std::endl;
+        std::cout << "Starting Eigen Solver..." << std::endl;
         Eigen::SelfAdjointEigenSolver<Matrix> solver(L);
-        if (world_rank == 0) std::cout << "Eigen Solver Finished!" << std::endl;
+        std::cout << "Eigen Solver Finished!" << std::endl;
+        
+        // Extract the k smallest eigenvectors
         global_eigenvectors = solver.eigenvectors().leftCols(k);
-    } 
-    else{
-        // Workers just send their diagonal data and wait
-        MPI_Gather(local_diagonal_values.data(), count, MPI_DOUBLE, nullptr, 0, MPI_DOUBLE, 0, MPI_COMM_WORLD);
     }
 
-
     // eigenvectors normalization
-    using RowMatrix = Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>;
-    RowMatrix global_eigenvectors_row = global_eigenvectors; 
-    RowMatrix local_eigenvectors_row(count, k);
-    MPI_Scatter(global_eigenvectors_row.data(), count * k, MPI_DOUBLE, local_eigenvectors_row.data(), count * k, MPI_DOUBLE, 0, MPI_COMM_WORLD);
-    normalize_eigenvectors(local_eigenvectors_row);
-    MPI_Allgather(local_eigenvectors_row.data(), count * k, MPI_DOUBLE, global_eigenvectors_row.data(), count * k, MPI_DOUBLE, MPI_COMM_WORLD);
-    global_eigenvectors = global_eigenvectors_row;
+    MPI_Scatter(global_eigenvectors.data(), count * k, MPI_DOUBLE, local_eigenvectors.data(), count * k, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+    normalize_eigenvectors(local_eigenvectors);
+    MPI_Allgather(local_eigenvectors.data(), count * k, MPI_DOUBLE, global_eigenvectors.data(), count * k, MPI_DOUBLE, MPI_COMM_WORLD);
     
     return k_means(global_eigenvectors, k);
 }

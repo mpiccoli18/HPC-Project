@@ -26,6 +26,9 @@ std::vector<int> k_means(const Matrix& X, int k, int max_iters) {
     int r = count * (world_rank + 1); // index of the local end row
     bool iterating = true;                 //boolean value for loops
     int iter = 0;
+    int label;
+    Matrix local_centroid_sums, next_centroids;     //for calculating the centroids
+    std::vector<int> local_counts(k, 0);
 
     Matrix global_centroids(k, X.cols());
 
@@ -46,7 +49,7 @@ std::vector<int> k_means(const Matrix& X, int k, int max_iters) {
         local_labels = evaluate_k_means_labels(X, global_centroids, l, r);
         MPI_Gather(local_labels.data(), count, MPI_INT, world_rank == 0 ? global_labels.data() : nullptr, count, MPI_INT, 0, MPI_COMM_WORLD);
 
-        if(world_rank == 0){
+        /*if(world_rank == 0){
             Matrix new_centroids = Matrix::Zero(k, X.cols());
             std::vector<int> counts(k, 0);
 
@@ -65,7 +68,36 @@ std::vector<int> k_means(const Matrix& X, int k, int max_iters) {
             }
             global_centroids = new_centroids;
             iter++;
+        }*/
+
+        // Partial sum calculation
+        local_centroid_sums = Matrix::Zero(k, X.cols());
+
+        for (int i = 0; i < count; ++i) {
+            label = local_labels[i];
+            local_centroid_sums.row(label) += X.row(l + i);
+            local_counts[label]++;
         }
+
+        Matrix global_centroid_sums = Matrix::Zero(k, X.cols());
+        std::vector<int> global_counts(k, 0);
+
+        // Sum up all partial centroids and counts across the whole cluster
+        MPI_Allreduce(local_centroid_sums.data(), global_centroid_sums.data(), k * X.cols(), MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+        MPI_Allreduce(local_counts.data(), global_counts.data(), k, MPI_INT, MPI_SUM, MPI_COMM_WORLD);
+
+        // All node compute
+        next_centroids = Matrix::Zero(k, X.cols());
+        for (int j = 0; j < k; ++j) {
+            if (global_counts[j] > 0) 
+                next_centroids.row(j) = global_centroid_sums.row(j) / static_cast<double>(global_counts[j]);
+        }
+
+        if ((next_centroids - global_centroids).norm() < 1e-3){
+            iterating = false;
+        } 
+        global_centroids = next_centroids;
+        iter++;
         MPI_Bcast(&iterating, 1, MPI_CXX_BOOL, 0, MPI_COMM_WORLD);   //broadcast loop or not
     }
     

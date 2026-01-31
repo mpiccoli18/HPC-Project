@@ -10,19 +10,21 @@
 */
 
 std::vector<double> evaluate_gaussian_similarity_values(const Matrix& X, int l, int r, double sigma) {
-    std::vector<double> similarity_values;
-    
+    int n = X.rows();
+    std::vector<double> similarity_values ((r - l) * n);
+    double squared_euclidean_distance;
+    int similarity_index;
     const double denominator = 2 * sigma * sigma;
 
     for (int i = l; i < r; ++i) {
-        for (int j = 0; j < X.rows(); ++j) {
-            if (i != j) {
-                double squared_euclidean_distance = (X.row(i) - X.row(j)).squaredNorm();
-                double similarity = exp(-squared_euclidean_distance / denominator);
-                similarity_values.push_back(similarity);
-            } else {
-                similarity_values.push_back(0.0);
+        for (int j = 0; j < n; ++j) {
+            similarity_index = (i - l) * n + j;
+            if(i == j){
+                similarity_values[similarity_index] = 0.0;
+                continue;
             }
+            squared_euclidean_distance = (X.row(i) - X.row(j)).squaredNorm();
+            similarity_values[similarity_index] = exp(-squared_euclidean_distance / denominator);
         }
     }
 
@@ -51,13 +53,14 @@ void normalize_eigenvectors(Matrix& X) {
 
 std::vector<int> evaluate_k_means_labels(const Matrix& X, const Matrix& centroids, int l, int r) {
     std::vector<int> labels;
+    double min_distance, distance;
+    int label = -1;
 
     for (int i = l; i < r; ++i) {
-        double min_distance = std::numeric_limits<double>::max();
-        int label = -1;
+        min_distance = std::numeric_limits<double>::max();
 
         for (int j = 0; j < centroids.rows(); ++j) {
-            double distance = (X.row(i) - centroids.row(j)).squaredNorm();
+            distance = (X.row(i) - centroids.row(j)).squaredNorm();
 
             if (distance < min_distance) {
                 min_distance = distance;
