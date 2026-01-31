@@ -1,0 +1,14 @@
+--- Parallel Performance Benchmark ---
+Dataset, Time(s)
+Starting Eigen Solver...
+Eigen Solver Finished!
+K-Means Iteration: 0
+K-Means Iteration: 1
+K-Means Iteration: 2
+Dataset: ./data/input/test_8192.csv | Ranks: 16 | Execution Time: 1770.61s
+Starting Eigen Solver...
+Eigen Solver Finished!
+K-Means Iteration: 0
+K-Means Iteration: 1
+K-Means Iteration: 2
+Dataset: ./data/input/test_16384.csv | Ranks: 16 | Execution Time: 9247.5s
