@@ -6,4 +6,8 @@
 #include <memory>
 
 std::vector<int> spectral_clustering(Matrix& X, int k, double sigma = 1.0);
+
+//Lanczos method for computing the eigenvalues
+void lanczos(const Matrix& local_L, int n, int count, int m, int k, Matrix& global_eigenvectors, int world_rank);
+
 #endif

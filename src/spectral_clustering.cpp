@@ -2,6 +2,98 @@
 #include "../include/similarity_matrix.hpp"
 #include "../include/k_means.hpp"
 
+void lanczos(const Matrix& local_L, int n, int count, int m, int k, Matrix& global_eigenvectors, int world_rank) {
+    
+    Matrix Q = Matrix::Zero(n, m);  // orthonormal basis
+    Eigen::VectorXd alpha = Eigen::VectorXd::Zero(m);
+    Eigen::VectorXd beta = Eigen::VectorXd::Zero(m);
+    
+    // Use a fixed seed for consistency across all ranks
+    Eigen::VectorXd q = Eigen::VectorXd::Constant(n, 1.0 / std::sqrt(n));
+    Q.col(0) = q;
+
+    int l = world_rank * count; // Local offset
+
+    for (int j = 0; j < m; ++j) {
+        Eigen::VectorXd global_q = Q.col(j);
+        Eigen::VectorXd local_w(count);
+
+        // Parallel Matrix-Vector Multiplication (w = L * q)
+        #pragma omp parallel for
+        for (int i = 0; i < count; ++i) {
+            double sum = 0.0;
+            for (int col = 0; col < n; ++col) {
+                sum += local_L(i, col) * global_q(col);
+            }
+            local_w(i) = sum;
+        }
+
+        // Parallel Dot Product for Alpha
+        double local_alpha = 0.0;
+        #pragma omp parallel for reduction(+:local_alpha)
+        for (int i = 0; i < count; ++i) {
+            local_alpha += global_q(l + i) * local_w(i);
+        }
+        
+        double global_alpha;
+        MPI_Allreduce(&local_alpha, &global_alpha, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+        alpha(j) = global_alpha;
+
+        if (j == m - 1) break;
+
+        // Parallel Vector Update (w' = w - alpha*q - beta*q_prev)
+        Eigen::VectorXd local_next_w(count);
+        double prev_beta = (j > 0) ? beta(j-1) : 0.0;
+        
+        #pragma omp parallel for
+        for (int i = 0; i < count; ++i) {
+            double val = local_w(i) - global_alpha * global_q(l + i);
+            if (j > 0) {
+                val -= prev_beta * Q(l + i, j - 1);
+            }
+            local_next_w(i) = val;
+        }
+
+        // Norm Calculation for Beta
+        double local_norm_sq = 0.0;
+        #pragma omp parallel for reduction(+:local_norm_sq)
+        for (int i = 0; i < count; ++i) {
+            local_norm_sq += local_next_w(i) * local_next_w(i);
+        }
+
+        double global_norm_sq;
+        MPI_Allreduce(&local_norm_sq, &global_norm_sq, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+        beta(j) = std::sqrt(global_norm_sq);
+
+        if (beta(j) < 1e-10) break;
+
+        Eigen::VectorXd next_q_part(count);
+        double inv_beta = 1.0 / beta(j);
+        
+        #pragma omp parallel for
+        for(int i = 0; i < count; ++i) {
+            next_q_part(i) = local_next_w(i) * inv_beta;
+        }
+
+        MPI_Allgather(next_q_part.data(), count, MPI_DOUBLE, 
+                      Q.col(j+1).data(), count, MPI_DOUBLE, MPI_COMM_WORLD);
+    }
+
+    // Solve the tiny m x m Tridiagonal matrix on Rank 0
+    if (world_rank == 0) {
+        Eigen::MatrixXd T = Eigen::MatrixXd::Zero(m, m);
+        for (int i = 0; i < m; ++i) {
+            T(i, i) = alpha(i);
+            if (i < m - 1) {
+                T(i, i+1) = beta(i);
+                T(i+1, i) = beta(i);
+            }
+        }
+        Eigen::SelfAdjointEigenSolver<Eigen::MatrixXd> tiny_solver(T);
+        global_eigenvectors = Q * tiny_solver.eigenvectors().leftCols(k);
+    }
+}
+
 std::vector<int> spectral_clustering(Matrix& X, int k, double sigma) {
     int world_rank;
     int world_size;
@@ -17,54 +109,49 @@ std::vector<int> spectral_clustering(Matrix& X, int k, double sigma) {
     Matrix global_eigenvectors = Matrix::Zero(n, k);
     Eigen::VectorXd degrees = Eigen::VectorXd::Zero(n);  //zero matrix for everyone
     std::vector<double> local_similarity_values = evaluate_gaussian_similarity_values(X, l, r, sigma);
-    Matrix similarity_matrix;
 
-    // Direct gather to Matrix to save memory
-    if (world_rank == 0) {
-        similarity_matrix.resize(n, n);
+    //Partial row sums
+    for (int i = 0; i < count; ++i) {
+        double row_sum = 0.0;
+        for (int j = 0; j < n; ++j) {
+            row_sum += local_similarity_values[i * n + j];
+        }
+        degrees(l + i) = row_sum;
+    }
+
+    MPI_Allreduce(MPI_IN_PLACE, degrees.data(), n, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+    // Construct the Local Laplacian directly
+    Matrix local_L(count, n);
+    for (int i = 0; i < count; ++i) {
+        int global_i = l + i;
+        double d_i_inv = (degrees(global_i) > 1e-9) ? 1.0 / std::sqrt(degrees(global_i)) : 0.0;
+        for (int j = 0; j < n; ++j) {
+            double d_j_inv = (degrees(j) > 1e-9) ? 1.0 / std::sqrt(degrees(j)) : 0.0;
+            if (global_i == j) {
+                local_L(i, j) = 1.0; 
+            } else {
+                local_L(i, j) = -local_similarity_values[i * n + j] * d_i_inv * d_j_inv;
+            }
+        }
+    }
+
+    // m = iterations
+    int m = std::min(n, k + 40); 
+    
+    if (world_rank == 0){
+        std::cout << "Starting Lanczos Solver (" << m << " iters)..." << std::endl;
     }
     
-    MPI_Gather(local_similarity_values.data(), n * count, MPI_DOUBLE, 
-               world_rank == 0 ? similarity_matrix.data() : nullptr, n * count, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+    double start_t = MPI_Wtime();
+    lanczos(local_L, n, count, m, k, global_eigenvectors, world_rank);
+    double end_t = MPI_Wtime();
 
     if (world_rank == 0) {
-        degrees = similarity_matrix.rowwise().sum();
+        std::cout << "Lanczos Solver Finished in " << end_t - start_t << " seconds!" << std::endl;
     }
 
-    //broadcast the degree
-    MPI_Bcast(degrees.data(), n, MPI_DOUBLE, 0, MPI_COMM_WORLD);
-
-    std::vector<double> local_diagonal_values = evaluate_diagonal_values(degrees, l, r);
-    Eigen::VectorXd diagonal_vector(n);
-    MPI_Gather(local_diagonal_values.data(), count, MPI_DOUBLE, 
-            diagonal_vector.data(), count, MPI_DOUBLE, 0, MPI_COMM_WORLD);
-
-    if (world_rank == 0) {
-        // normalized Laplacian calculation
-        
-        Matrix L = diagonal_vector.asDiagonal() * (Matrix::Identity(n, n) - similarity_matrix) * diagonal_vector.asDiagonal();
-        
-        Eigen::setNbThreads(8);
-        
-        std::cout << "Starting Eigen Solver..." << std::endl;
-        
-        double start_t = MPI_Wtime();   //start the time
-        
-        Eigen::SelfAdjointEigenSolver<Matrix> solver(L);
-        
-        double end_t = MPI_Wtime();   //start the time
-        
-        std::cout << "Eigen Solver Finished in " << end_t - start_t << " seconds!" << std::endl;
-        
-        Eigen::setNbThreads(1);
-        // Extract the k smallest eigenvectors
-        global_eigenvectors = solver.eigenvectors().leftCols(k);
-    }
-
-    // eigenvectors normalization
-    MPI_Scatter(global_eigenvectors.data(), count * k, MPI_DOUBLE, local_eigenvectors.data(), count * k, MPI_DOUBLE, 0, MPI_COMM_WORLD);
-    normalize_eigenvectors(local_eigenvectors);
-    MPI_Allgather(local_eigenvectors.data(), count * k, MPI_DOUBLE, global_eigenvectors.data(), count * k, MPI_DOUBLE, MPI_COMM_WORLD);
+    // Broadcast the results
+    MPI_Bcast(global_eigenvectors.data(), n * k, MPI_DOUBLE, 0, MPI_COMM_WORLD);
     
     return k_means(global_eigenvectors, k);
-}
+}   
