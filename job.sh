@@ -1,5 +1,5 @@
 #!/bin/bash
-#PBS -l select=16:ncpus=8:mpiprocs=1:mem=16gb -l place=scatter
+#PBS -l select=8:ncpus=8:mpiprocs=1:mem=16gb -l place=scatter
 #PBS -l walltime=6:00:00
 #PBS -q shortCPUQ
 
@@ -18,7 +18,7 @@ export OMP_NESTED=false
 export OMP_MAX_ACTIVE_LEVELS=1
 
 datasets=("test_512.csv" "test_1024.csv" "test_2048.csv" "test_4096.csv" "test_8192.csv" "test_16384.csv" "test_32768.csv" "test_65536.csv" "test_131072.csv")
-sigmas=("1.0" "0.6" "0.45" "0.35" "0.25" "0.2")
+sigmas=("1.0" "0.6" "0.45" "0.35" "0.25" "0.2" "0.2" "0.2" "0.2")
 
 echo "--- Parallel Performance Benchmark ---"
 echo "Dataset, Time(s)"
@@ -34,5 +34,5 @@ for i in "${!datasets[@]}"; do
     mpiexec --mca mpi_cuda_support 0 \
         --mca btl ^openib \
         --mca oob ^ud \
-        -n 16 ./bin/spectral_clustering "$INPUT_PATH" "$OUTPUT_PATH" "$sigma"
+        -n 8 ./bin/spectral_clustering "$INPUT_PATH" "$OUTPUT_PATH" "$sigma"
 done

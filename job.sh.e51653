@@ -1,0 +1,7 @@
+Loading GCC/11.2.0
+  Loading requirement: GCCcore/11.2.0 zlib/1.2.11-GCCcore-11.2.0
+    binutils/2.37-GCCcore-11.2.0
+/var/spool/pbs/mom_priv/jobs/51653.hpc3-head1.unitn.it.SC: line 15: 691430 Killed                  ./bin/spectral_clustering "$INPUT_PATH"
+/var/spool/pbs/mom_priv/jobs/51653.hpc3-head1.unitn.it.SC: line 15: 692094 Killed                  ./bin/spectral_clustering "$INPUT_PATH"
+/var/spool/pbs/mom_priv/jobs/51653.hpc3-head1.unitn.it.SC: line 15: 692512 Killed                  ./bin/spectral_clustering "$INPUT_PATH"
+cgroup/OOM: Killed because of memory limit
