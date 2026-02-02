@@ -34,6 +34,7 @@ std::vector<int> k_means(const Matrix& X, int k, int max_iters) {
     if (world_rank == 0) {
         global_centroids = init_centroids(X, k);
     }
+    MPI_Bcast(global_centroids.data(), k * X.cols(), MPI_DOUBLE, 0, MPI_COMM_WORLD);
 
     std::vector<int> local_labels(count, -1); 
     std::vector<int> global_labels(n, -1);
@@ -66,9 +67,17 @@ std::vector<int> k_means(const Matrix& X, int k, int max_iters) {
 
         // All node compute
         next_centroids = Matrix::Zero(k, X.cols());
-        for (int j = 0; j < k; ++j) {
-            if (global_counts[j] > 0) 
+        for (int j = 0; j < k; j++) {
+            if (global_counts[j] > 0){
                 next_centroids.row(j) = global_centroid_sums.row(j) / static_cast<double>(global_counts[j]);
+            }
+            else{
+                if (world_rank == 0) {
+                    std::cout << "Warning: Cluster " << j << " is empty. Re-initializing..." << std::endl;
+                    next_centroids.row(j) = X.row(rand() % n);
+                }
+                MPI_Bcast(next_centroids.row(j).data(), X.cols(), MPI_DOUBLE, 0, MPI_COMM_WORLD);  
+            }
         }
 
         if ((next_centroids - global_centroids).norm() < 1e-3){
@@ -76,7 +85,7 @@ std::vector<int> k_means(const Matrix& X, int k, int max_iters) {
         } 
         global_centroids = next_centroids;
         iter++;
-        MPI_Bcast(&iterating, 1, MPI_CXX_BOOL, 0, MPI_COMM_WORLD);   //broadcast loop or not
+        //MPI_Bcast(&iterating, 1, MPI_CXX_BOOL, 0, MPI_COMM_WORLD);   //broadcast loop or not
     }
     
     // After convergence gather

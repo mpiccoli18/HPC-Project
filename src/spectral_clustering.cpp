@@ -54,7 +54,7 @@ void lanczos(const Matrix& local_L, int n, int count, int m, int k, Matrix& glob
 
         // Parallel Vector Update (w' = w - alpha*q - beta*q_prev)
         Eigen::VectorXd local_next_w(count);
-        double prev_beta = (j > 0) ? beta(j-1) : 0.0;
+        double prev_beta = (j > 0) ? beta(j - 1) : 0.0;
         
         #pragma omp parallel for
         for (int i = 0; i < count; ++i) {
@@ -72,22 +72,20 @@ void lanczos(const Matrix& local_L, int n, int count, int m, int k, Matrix& glob
             
             MPI_Allreduce(local_overlaps.data(), global_overlaps.data(), j + 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
 
-            Eigen::VectorXd correction = Q.block(l, 0, count, j + 1) * global_overlaps;
-            local_next_w -= correction;
+            local_next_w -= Q.leftCols(j + 1).block(l, 0, count, j + 1) * global_overlaps;
         }
 
-        // Norm Calculation for Beta
-        double local_norm_sq = 0.0;
-        #pragma omp parallel for reduction(+:local_norm_sq)
-        for (int i = 0; i < count; ++i) {
-            local_norm_sq += local_next_w(i) * local_next_w(i);
+        double local_normSq = local_next_w.squaredNorm();
+        double global_normSq;
+        MPI_Allreduce(&local_normSq, &global_normSq, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+
+        beta(j) = std::sqrt(global_normSq);
+
+        // If beta is effectively zero, we have found all possible eigenvectors in this subspace.
+        if (beta(j) < 1e-12) {
+            idx = j + 1; 
+            break; 
         }
-
-        double global_norm_sq;
-        MPI_Allreduce(&local_norm_sq, &global_norm_sq, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
-        beta(j) = std::sqrt(global_norm_sq);
-
-        if (beta(j) < 1e-10) break;
 
         Eigen::VectorXd next_q_part(count);
         double inv_beta = 1.0 / beta(j);
@@ -127,7 +125,7 @@ void lanczos(const Matrix& local_L, int n, int count, int m, int k, Matrix& glob
 
             Matrix validQ = Q.leftCols(idx2);
             Matrix all_eigen = solver.eigenvectors();
-            Matrix best_eigen = all_eigen.rightCols(kF);
+            Matrix best_eigen = all_eigen.leftCols(kF);
             //Matrix validEigenvectors = solver.eigenvectors().leftCols(kF);
             
             // Map to global output (pad with zeros if kF < k)
@@ -185,7 +183,7 @@ std::vector<int> spectral_clustering(Matrix& X, int k, double sigma) {
             if (global_i == j) {
                 local_L(i, j) = 1.0; 
             } else {
-                local_L(i, j) = local_similarity_values[i * n + j] * d_i_inv * d_j_inv;
+                local_L(i, j) = -local_similarity_values[i * n + j] * d_i_inv * d_j_inv;
             }
         }
     }
