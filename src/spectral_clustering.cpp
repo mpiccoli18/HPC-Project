@@ -27,15 +27,15 @@ Eigen::MatrixXd gaussian_similarity_matrix(const Eigen::MatrixXd& matrix, double
     return similarity_matrix;
 }
 
-void lanczos(const Matrix& L, int n, int m, int k, Matrix& eigenvectors) {
+void lanczos(const Eigen::MatrixXd& L, int n, int m, int k, Eigen::MatrixXd& eigenvectors) {
     
-    Matrix Q = Matrix::Zero(n, m); //orthonormal basis
+    Eigen::MatrixXd Q = Eigen::MatrixXd::Zero(n, m); //orthonormal basis
     Eigen::VectorXd alpha = Eigen::VectorXd::Zero(m);
     Eigen::VectorXd beta = Eigen::VectorXd::Zero(m);
 
     // Use a fixed seed
     std::mt19937 gen(42);
-    std::norm_distr<double> dist(0.0, 1.0);
+    std::normal_distribution<double> dist(0.0, 1.0);
     Eigen::VectorXd q(n);
     
     for(int i = 0; i < n; i++){
@@ -80,12 +80,11 @@ void lanczos(const Matrix& L, int n, int m, int k, Matrix& eigenvectors) {
     }
     
     Eigen::SelfAdjointEigenSolver<Eigen::MatrixXd> solver(T);
-    Matrix best_eigen = solver.eigenvectors().leftCols(k); // Select k smallest
+    Eigen::MatrixXd best_eigen = solver.eigenvectors().leftCols(k); // Select k smallest
     eigenvectors = Q.leftCols(m) * best_eigen;
 }
 
 std::vector<int> spectral_clustering(const Eigen::MatrixXd& matrix, int k, double sigma) {
-    double d_i, d_j;
     int n = matrix.rows();
     Eigen::MatrixXd similarity_matrix = gaussian_similarity_matrix(matrix, sigma);
 
@@ -100,8 +99,8 @@ std::vector<int> spectral_clustering(const Eigen::MatrixXd& matrix, int k, doubl
 				L(i, j) = 1.0;
 			}
 			else{
-				d_i = (degrees(i) > 1e-12) ? 1.0 / std::sqrt(degrees(i)) : 0.0;
-				d_j = (degrees(j) > 1e-12) ? 1.0 / std::sqrt(degrees(j)) : 0.0;
+				double d_i = (degrees(i) > 1e-12) ? 1.0 / std::sqrt(degrees(i)) : 0.0;
+				double d_j = (degrees(j) > 1e-12) ? 1.0 / std::sqrt(degrees(j)) : 0.0;
 				L(i, j) = -similarity_matrix(i, j) * d_i * d_j;
 			}
 		}

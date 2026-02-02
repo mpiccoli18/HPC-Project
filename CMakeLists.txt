@@ -14,8 +14,9 @@ target_include_directories(Eigen5 INTERFACE
 )
 
 # MPI
-find_package(MPI REQUIRED)
-include_directories(${MPI_CXX_INCLUDE_PATH})
+
+#find_package(MPI REQUIRED)
+#include_directories(${MPI_CXX_INCLUDE_PATH})
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin)
 
@@ -31,5 +32,5 @@ add_executable(spectral_clustering ${SOURCES})
 target_link_libraries(spectral_clustering
     PRIVATE
         Eigen5
-        MPI::MPI_CXX
+        #MPI::MPI_CXX
 )
