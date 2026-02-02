@@ -17,7 +17,7 @@ export OMP_PLACES=cores
 export OMP_NESTED=false
 export OMP_MAX_ACTIVE_LEVELS=1
 
-datasets=("test_512.csv" "test_1024.csv" "test_2048.csv" "test_4096.csv" "test_8192.csv" "test_16384.csv")
+datasets=("test_512.csv" "test_1024.csv" "test_2048.csv" "test_4096.csv" "test_8192.csv" "test_16384.csv" "test_32768.csv" "test_65536.csv" "test_131072.csv")
 sigmas=("1.0" "0.6" "0.45" "0.35" "0.25" "0.2")
 
 echo "--- Parallel Performance Benchmark ---"
