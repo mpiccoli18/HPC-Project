@@ -13,13 +13,14 @@ int main(int argc, char** argv)
     MPI_Comm_size(MPI_COMM_WORLD, &world_size);
 
     if (world_rank == 0) {
-        if (argc < 3) {
-            std::cerr << "Usage: ./program input_file.csv output_file.csv" << std::endl;
+        if (argc < 4) {
+            std::cerr << "Usage: ./program input_file.csv output_file.csv sigma_value" << std::endl;
             return 1;
         }
     }
     const std::string input_path = argv[1];
     const std::string output_path = argv[2];
+    double sigma = std::stod(argv[3]);
 
     Matrix X;
     int rows = 0, cols = 0;
@@ -37,6 +38,7 @@ int main(int argc, char** argv)
         max_label = *std::max_element(labels.begin(), labels.end());
     } 
 
+    //Broadcast rows, cols and label to all nodes
     MPI_Bcast(&rows, 1, MPI_INT, 0, MPI_COMM_WORLD);
     MPI_Bcast(&cols, 1, MPI_INT, 0, MPI_COMM_WORLD);
     MPI_Bcast(&max_label, 1, MPI_INT, 0, MPI_COMM_WORLD);
@@ -48,13 +50,14 @@ int main(int argc, char** argv)
 
     double start_t = MPI_Wtime();   //start the time
     
-    std::vector<int> output_labels = spectral_clustering(X, max_label + 1);
+    std::vector<int> output_labels = spectral_clustering(X, max_label + 1, sigma);
 
     double end_t = MPI_Wtime();     //stop the time
     if (world_rank == 0) {
         std::cout << "Dataset: " << input_path 
                   << " | Ranks: " << world_size 
                   << " | Execution Time: " << (end_t - start_t) << "s" 
+                  << " | Value of sigma: " << sigma
                   << std::endl;        
         if (!save_csv(output_path, X, output_labels)) {
             std::cerr << "Error: cannot open output file at path " << output_path << std::endl;

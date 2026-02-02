@@ -9,7 +9,7 @@ def dataset(n_samples, n_features, centers, filename):
     x, y = make_blobs(n_samples=n_samples, n_features=n_features,
                       centers=centers, cluster_std=0.6, random_state=42)
     
-    df = pd.DataFrame(X, columns=['x', 'y', 'z'])
+    df = pd.DataFrame(x, columns=['x', 'y', 'z'])
     df['label'] = y
     
     full_path = os.path.join('data/input', filename)
