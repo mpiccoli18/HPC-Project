@@ -95,8 +95,10 @@ void lanczos(const Matrix& local_L, int n, int count, int m, int k, Matrix& glob
             next_q_part(i) = local_next_w(i) * inv_beta;
         }
 
-        MPI_Allgather(next_q_part.data(), count, MPI_DOUBLE, Q.col(j+1).data(), count, MPI_DOUBLE, MPI_COMM_WORLD);
-        
+        Eigen::VectorXd tmp(n);
+        MPI_Allgather(next_q_part.data(), count, MPI_DOUBLE, tmp.data(), count, MPI_DOUBLE, MPI_COMM_WORLD);
+        Q.col(j+1) = tmp;
+
         if (world_rank == 0 && j > 0) {
             double dot = Q.col(j).dot(Q.col(j-1)); 
             if (std::abs(dot) > 1e-9){

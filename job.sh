@@ -1,12 +1,12 @@
 #!/bin/bash
-#PBS -l select=2:ncpus=8:mpiprocs=1:mem=8gb -l place=scatter
+#PBS -l select=16:ncpus=8:mpiprocs=1:mem=16gb -l place=scatter
 #PBS -l walltime=6:00:00
-#PBS -q short_cpuQ
+#PBS -q shortCPUQ
 
 
 module purge
-module load gcc91
-module load openmpi-3.0.0--gcc-9.1.0
+module load GCC/11.2.0
+module load OpenMPI/4.1.1-GCC-11.2.0
 
 cd $PBS_O_WORKDIR
 
@@ -34,5 +34,5 @@ for i in "${!datasets[@]}"; do
     mpiexec --mca mpi_cuda_support 0 \
         --mca btl ^openib \
         --mca oob ^ud \
-        -n 2 ./bin/spectral_clustering "$INPUT_PATH" "$OUTPUT_PATH" "$sigma"
+        -n 16 ./bin/spectral_clustering "$INPUT_PATH" "$OUTPUT_PATH" "$sigma"
 done
