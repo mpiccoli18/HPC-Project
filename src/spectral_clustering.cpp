@@ -27,28 +27,92 @@ Eigen::MatrixXd gaussian_similarity_matrix(const Eigen::MatrixXd& matrix, double
     return similarity_matrix;
 }
 
-std::vector<int> spectral_clustering(const Eigen::MatrixXd& matrix, int k, double sigma) {
-    int n = matrix.rows();
-    Eigen::MatrixXd similarity_matrix = gaussian_similarity_matrix(matrix, sigma);
+void lanczos(const Matrix& L, int n, int m, int k, Matrix& eigenvectors) {
+    
+    Matrix Q = Matrix::Zero(n, m); //orthonormal basis
+    Eigen::VectorXd alpha = Eigen::VectorXd::Zero(m);
+    Eigen::VectorXd beta = Eigen::VectorXd::Zero(m);
 
-    // diagonal matrix
-    Eigen::VectorXd degrees = similarity_matrix.colwise().sum().transpose();
-    Eigen::MatrixXd diagonal_matrix = Eigen::MatrixXd::Zero(n, n);
+    // Use a fixed seed
+    std::mt19937 gen(42);
+    std::norm_distr<double> dist(0.0, 1.0);
+    Eigen::VectorXd q(n);
+    
+    for(int i = 0; i < n; i++){
+        q(i) = dist(gen);
+    } 
 
-    for (int i = 0; i < n; ++i) {
-        if (degrees(i) > 1e-12) {
-            diagonal_matrix(i, i) = 1.0 / sqrt(degrees(i));
+    q.normalize();
+    Q.col(0) = q;
+
+    // Matrix-Vector Multiplication (w = L * q)
+    for (int j = 0; j < m; ++j) {
+        Eigen::VectorXd w = L * Q.col(j);
+        
+        if (j > 0) w -= beta(j-1) * Q.col(j-1);
+        
+        alpha(j) = w.dot(Q.col(j));
+        w -= alpha(j) * Q.col(j);
+
+        // Full Re-orthogonalization
+        for (int i = 0; i < 2; i++) {
+            Eigen::VectorXd overlaps = Q.leftCols(j + 1).transpose() * w;
+            w -= Q.leftCols(j + 1) * overlaps;
+        }
+
+        beta(j) = w.norm(); // Simple norm
+
+        if (beta(j) < 1e-12) break;
+
+        if (j < m - 1) {
+            Q.col(j + 1) = w / beta(j);
         }
     }
 
-    // normalized graph Laplacian
-    Eigen::MatrixXd L = Eigen::MatrixXd::Identity(n, n) - diagonal_matrix * similarity_matrix * diagonal_matrix;
+    // Solve Tridiagonal
+    Eigen::MatrixXd T = Eigen::MatrixXd::Zero(m, m);
+    for (int i = 0; i < m; i++) {
+        T(i, i) = alpha(i);
+        if (i < m - 1) { 
+            T(i, i + 1) = beta(i); 
+            T(i + 1, i) = beta(i); 
+        }
+    }
+    
+    Eigen::SelfAdjointEigenSolver<Eigen::MatrixXd> solver(T);
+    Matrix best_eigen = solver.eigenvectors().leftCols(k); // Select k smallest
+    eigenvectors = Q.leftCols(m) * best_eigen;
+}
 
-    // eigen decomposition
-    Eigen::SelfAdjointEigenSolver<Eigen::MatrixXd> solver(L);
-    Eigen::MatrixXd eigenvectors = solver.eigenvectors().leftCols(k);
+std::vector<int> spectral_clustering(const Eigen::MatrixXd& matrix, int k, double sigma) {
+    double d_i, d_j;
+    int n = matrix.rows();
+    Eigen::MatrixXd similarity_matrix = gaussian_similarity_matrix(matrix, sigma);
 
-    // normalize rows
+    // Diagonal matrix
+	Eigen::MatrixXd degrees = similarity_matrix.colwise().sum().transpose();
+	Eigen::MatrixXd L(n, n);
+
+    // Normalized symmetric Laplacian
+	for(int i = 0; i < n; i++){
+		for(int j = 0; j < n; j++){
+			if(i == j){
+				L(i, j) = 1.0;
+			}
+			else{
+				d_i = (degrees(i) > 1e-12) ? 1.0 / std::sqrt(degrees(i)) : 0.0;
+				d_j = (degrees(j) > 1e-12) ? 1.0 / std::sqrt(degrees(j)) : 0.0;
+				L(i, j) = -similarity_matrix(i, j) * d_i * d_j;
+			}
+		}
+	}
+    
+    // Eigen decomposition
+	int m = std::min(n, std::max(k * 10, 60));
+	Eigen::MatrixXd eigenvectors;
+	lanczos(L, n, m, k, eigenvectors);
+    
+    // Normalize rows
     for (int i = 0; i < n; ++i) {
         eigenvectors.row(i).normalize();
     }
