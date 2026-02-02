@@ -16,6 +16,6 @@ def dataset(n_samples, n_features, centers, filename):
     df.to_csv(full_path, index=False)
     print(f"Created: {full_path}")
 
-pow2_sizes = [512, 1024, 2048, 4096, 8192, 16384, 32768, 65836]
+pow2_sizes = [512, 1024, 2048, 4096, 8192, 16384, 32768, 65536, 131072 ]
 for size in pow2_sizes:
     dataset(size, 3, 5, f"test_{size}.csv")
