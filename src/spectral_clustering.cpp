@@ -185,7 +185,7 @@ std::vector<int> spectral_clustering(Matrix& X, int k, double sigma) {
             if (global_i == j) {
                 local_L(i, j) = 1.0; 
             } else {
-                local_L(i, j) = -local_similarity_values[i * n + j] * d_i_inv * d_j_inv;
+                local_L(i, j) = -local_similarity_values[(size_t)i * n + j] * d_i_inv * d_j_inv;
             }
         }
     }

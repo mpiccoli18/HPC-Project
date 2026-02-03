@@ -11,14 +11,15 @@
 
 std::vector<double> evaluate_gaussian_similarity_values(const Matrix& X, int l, int r, double sigma) {
     int n = X.rows();
-    std::vector<double> similarity_values ((r - l) * n);
+    size_t tot = (size_t)(r - l) * (size_t)n;
+    std::vector<double> similarity_values (tot);
     double squared_euclidean_distance;
-    int similarity_index;
+    size_t similarity_index;
     const double denominator = 2 * sigma * sigma;
 
     for (int i = l; i < r; ++i) {
         for (int j = 0; j < n; ++j) {
-            similarity_index = (i - l) * n + j;
+            similarity_index = (size_t)(i - l) * (size_t)n + j;
             if(i == j){
                 similarity_values[similarity_index] = 0.0;
                 continue;

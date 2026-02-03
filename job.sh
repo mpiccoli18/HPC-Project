@@ -1,6 +1,6 @@
 #!/bin/bash
-#PBS -l select=16:ncpus=8:mpiprocs=1:mem=16gb -l place=scatter
-#PBS -l walltime=6:00:00
+#PBS -l select=2:ncpus=4:mpiprocs=1:mem=256gb -l place=scatter
+#PBS -l walltime=1:00:00
 #PBS -q shortCPUQ
 
 
@@ -18,18 +18,18 @@ export OMP_NESTED=false
 export OMP_MAX_ACTIVE_LEVELS=1
 
 datasets=("test_512.csv" "test_1024.csv" "test_2048.csv" "test_4096.csv" "test_8192.csv" "test_16384.csv" "test_32768.csv")
-sigmas=("1.0" "0.6" "0.45" "0.35" "0.25" "0.2" "0.15")
+sigmas=("1.0" "0.6" "0.45" "0.35" "0.25" "0.2" "0.2")
 
-datasets2=("test_65536.csv" "test_131072.csv")
-sigmas2=("0.1" "0.05")
+datasets2=("test_65536.csv")
+datasets3=("test_131072.csv")
 
 echo "--- Parallel Performance Benchmark ---"
 echo "Dataset, Time(s)"
 
 for i in "${!datasets[@]}"; do
 
-    data="${datasets[$i]}"
-    sigma="${sigmas[$i]}"
+    data="${datasets3[$i]}"
+    sigma="0.1"
 
     INPUT_PATH="./data/input/$data"
     OUTPUT_PATH="./data/output/$data"
@@ -38,5 +38,5 @@ for i in "${!datasets[@]}"; do
         --mca btl ^openib \
         --mca oob ^ud \
         --hostfile $PBS_NODEFILE \
-        -n 16 ./bin/spectral_clustering "$INPUT_PATH" "$OUTPUT_PATH" "$sigma"
+        -n 8 ./bin/spectral_clustering "$INPUT_PATH" "$OUTPUT_PATH" "$sigma"
 done
