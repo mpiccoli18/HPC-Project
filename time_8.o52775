@@ -1,0 +1,116 @@
+--- Parallel Performance Benchmark ---
+Dataset, Time(s)
+DEBUG: Average Degree (connectivity) is: 44.8714
+Starting Lanczos Solver (60 iters)...
+Lanczos Solver Finished in 17.8682 seconds!
+K-Means Iteration: 0
+K-Means Iteration: 1
+Warning: Cluster 2 is empty. Re-initializing...
+K-Means Iteration: 2
+K-Means Iteration: 3
+Dataset: ./data/input/test_512.csv | Ranks: 8 | Execution Time: 18.455s | Value of sigma: 1
+DEBUG: Average Degree (connectivity) is: 39.6112
+Starting Lanczos Solver (60 iters)...
+Lanczos Solver Finished in 16.9955 seconds!
+K-Means Iteration: 0
+K-Means Iteration: 1
+K-Means Iteration: 2
+Dataset: ./data/input/test_1024.csv | Ranks: 8 | Execution Time: 17.4721s | Value of sigma: 0.6
+DEBUG: Average Degree (connectivity) is: 41.7309
+Starting Lanczos Solver (60 iters)...
+Lanczos Solver Finished in 17.8672 seconds!
+K-Means Iteration: 0
+K-Means Iteration: 1
+Warning: Cluster 4 is empty. Re-initializing...
+K-Means Iteration: 2
+K-Means Iteration: 3
+K-Means Iteration: 4
+Dataset: ./data/input/test_2048.csv | Ranks: 8 | Execution Time: 18.7302s | Value of sigma: 0.45
+DEBUG: Average Degree (connectivity) is: 44.3864
+Starting Lanczos Solver (60 iters)...
+Lanczos Solver Finished in 17.94 seconds!
+K-Means Iteration: 0
+K-Means Iteration: 1
+K-Means Iteration: 2
+K-Means Iteration: 3
+K-Means Iteration: 4
+K-Means Iteration: 5
+Dataset: ./data/input/test_4096.csv | Ranks: 8 | Execution Time: 19.1042s | Value of sigma: 0.35
+DEBUG: Average Degree (connectivity) is: 36.1274
+Starting Lanczos Solver (60 iters)...
+Lanczos Solver Finished in 18.4711 seconds!
+K-Means Iteration: 0
+K-Means Iteration: 1
+K-Means Iteration: 2
+K-Means Iteration: 3
+K-Means Iteration: 4
+K-Means Iteration: 5
+K-Means Iteration: 6
+K-Means Iteration: 7
+K-Means Iteration: 8
+K-Means Iteration: 9
+K-Means Iteration: 10
+K-Means Iteration: 11
+K-Means Iteration: 12
+K-Means Iteration: 13
+K-Means Iteration: 14
+K-Means Iteration: 15
+K-Means Iteration: 16
+K-Means Iteration: 17
+K-Means Iteration: 18
+K-Means Iteration: 19
+Dataset: ./data/input/test_8192.csv | Ranks: 8 | Execution Time: 22.2756s | Value of sigma: 0.25
+DEBUG: Average Degree (connectivity) is: 39.0823
+Starting Lanczos Solver (60 iters)...
+Lanczos Solver Finished in 21.7664 seconds!
+K-Means Iteration: 0
+K-Means Iteration: 1
+K-Means Iteration: 2
+K-Means Iteration: 3
+K-Means Iteration: 4
+K-Means Iteration: 5
+K-Means Iteration: 6
+K-Means Iteration: 7
+K-Means Iteration: 8
+K-Means Iteration: 9
+K-Means Iteration: 10
+K-Means Iteration: 11
+K-Means Iteration: 12
+K-Means Iteration: 13
+K-Means Iteration: 14
+K-Means Iteration: 15
+K-Means Iteration: 16
+K-Means Iteration: 17
+K-Means Iteration: 18
+K-Means Iteration: 19
+K-Means Iteration: 20
+K-Means Iteration: 21
+Dataset: ./data/input/test_16384.csv | Ranks: 8 | Execution Time: 30.0072s | Value of sigma: 0.2
+DEBUG: Average Degree (connectivity) is: 34.2297
+Starting Lanczos Solver (60 iters)...
+Lanczos Solver Finished in 39.1769 seconds!
+K-Means Iteration: 0
+K-Means Iteration: 1
+K-Means Iteration: 2
+K-Means Iteration: 3
+K-Means Iteration: 4
+K-Means Iteration: 5
+K-Means Iteration: 6
+K-Means Iteration: 7
+K-Means Iteration: 8
+K-Means Iteration: 9
+K-Means Iteration: 10
+K-Means Iteration: 11
+K-Means Iteration: 12
+K-Means Iteration: 13
+K-Means Iteration: 14
+K-Means Iteration: 15
+K-Means Iteration: 16
+K-Means Iteration: 17
+K-Means Iteration: 18
+K-Means Iteration: 19
+K-Means Iteration: 20
+K-Means Iteration: 21
+K-Means Iteration: 22
+K-Means Iteration: 23
+Dataset: ./data/input/test_32768.csv | Ranks: 8 | Execution Time: 63.826s | Value of sigma: 0.15
