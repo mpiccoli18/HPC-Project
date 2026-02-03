@@ -7,7 +7,7 @@ module purge
 module load GCC/11.2.0
 
 cd $PBS_O_WORKDIR
-datasets=("test_131072.csv")
+datasets=("test_512.csv" "test_1024.csv" "test_2048.csv" "test_4096.csv" "test_8192.csv" "test_16384.csv" "test_32768.csv" "test_65536.csv" "test_131072.csv")
 
 echo "--- Serial Performance Benchmark ---"
 echo "Dataset, Time(s)"
