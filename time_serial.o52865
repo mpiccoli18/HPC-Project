@@ -1,0 +1,10 @@
+--- Serial Performance Benchmark ---
+Dataset, Time(s)
+Serial Execution Time: 0.0226023s
+Serial Execution Time: 0.0627611s
+Serial Execution Time: 0.231472s
+Serial Execution Time: 1.65835s
+Serial Execution Time: 7.9709s
+Serial Execution Time: 34.1225s
+Serial Execution Time: 259.938s
+Serial Execution Time: 1511s
