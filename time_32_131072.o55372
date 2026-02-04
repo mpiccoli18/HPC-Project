@@ -1,0 +1,38 @@
+--- Parallel Performance Benchmark ---
+Dataset, Time(s)
+DEBUG: Average Degree (connectivity) is: 42.0135
+Starting Lanczos Solver (60 iters)...
+Lanczos Solver Finished in 115.789 seconds!
+K-Means Iteration: 0
+K-Means Iteration: 1
+K-Means Iteration: 2
+K-Means Iteration: 3
+K-Means Iteration: 4
+K-Means Iteration: 5
+K-Means Iteration: 6
+K-Means Iteration: 7
+K-Means Iteration: 8
+K-Means Iteration: 9
+K-Means Iteration: 10
+K-Means Iteration: 11
+K-Means Iteration: 12
+K-Means Iteration: 13
+K-Means Iteration: 14
+K-Means Iteration: 15
+K-Means Iteration: 16
+K-Means Iteration: 17
+K-Means Iteration: 18
+K-Means Iteration: 19
+K-Means Iteration: 20
+K-Means Iteration: 21
+K-Means Iteration: 22
+K-Means Iteration: 23
+K-Means Iteration: 24
+K-Means Iteration: 25
+K-Means Iteration: 26
+K-Means Iteration: 27
+K-Means Iteration: 28
+K-Means Iteration: 29
+K-Means Iteration: 30
+K-Means Iteration: 31
+Dataset: ./data/input/test_131072.csv | Ranks: 32 | Execution Time: 237.936s | Value of sigma: 0.1

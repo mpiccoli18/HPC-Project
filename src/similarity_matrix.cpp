@@ -1,0 +1,74 @@
+#include "../include/common.hpp"
+#include "../include/similarity_matrix.hpp"
+
+/*
+    Computes the similarity matrix for a given matrix of size n x d.
+    Each entry (i, j) of the similarity matrix represents a similarity score for point i and point j of the input matrix;
+    similarity 1 means the points are identical, while similarity 0 means the points are far away.
+    The diagonal is set to 0, for the sake of graph Laplacians.
+    The sigma parameter controls the width of the Gaussian.
+*/
+
+std::vector<double> evaluate_gaussian_similarity_values(const Matrix& X, int l, int r, double sigma) {
+    int n = X.rows();
+    size_t tot = (size_t)(r - l) * (size_t)n;
+    std::vector<double> similarity_values (tot);
+    double squared_euclidean_distance;
+    size_t similarity_index;
+    const double denominator = 2 * sigma * sigma;
+
+    for (int i = l; i < r; ++i) {
+        for (int j = 0; j < n; ++j) {
+            similarity_index = (size_t)(i - l) * (size_t)n + j;
+            if(i == j){
+                similarity_values[similarity_index] = 0.0;
+                continue;
+            }
+            squared_euclidean_distance = (X.row(i) - X.row(j)).squaredNorm();
+            similarity_values[similarity_index] = exp(-squared_euclidean_distance / denominator);
+        }
+    }
+    return similarity_values;
+}
+
+std::vector<double> evaluate_diagonal_values(const Eigen::VectorXd& degrees, int l, int r) {
+    std::vector<double> diagonal_values;
+
+    for (int i = l; i < r; ++i) {
+        if (degrees(i) > 1e-9) {
+            diagonal_values.push_back(1.0 / sqrt(degrees(i)));
+        } else {
+            diagonal_values.push_back(0.0);
+        }
+    }
+    return diagonal_values;
+}
+
+void normalize_eigenvectors(Matrix& X) {
+    for (int i = 0; i < X.rows(); ++i) {
+        X.row(i).normalize();
+    }
+}
+
+std::vector<int> evaluate_k_means_labels(const Matrix& X, const Matrix& centroids, int l, int r) {
+    int count = r - l;
+    std::vector<int> labels(count);
+    double min_distance, distance;
+    int label = -1;
+
+    #pragma omp parallel for private(min_distance, distance, label)
+    for (int i = l; i < r; ++i) {
+        min_distance = std::numeric_limits<double>::max();
+
+        for (int j = 0; j < centroids.rows(); ++j) {
+            distance = (X.row(i) - centroids.row(j)).squaredNorm();
+
+            if (distance < min_distance) {
+                min_distance = distance;
+                label = j;
+            }
+        }
+        labels[i - l] = label;
+    }
+    return labels;
+}
