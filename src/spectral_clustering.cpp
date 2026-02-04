@@ -2,23 +2,73 @@
 #include "../include/similarity_matrix.hpp"
 #include "../include/k_means.hpp"
 
-/*
-    Computes the similarity matrix for a given matrix of size n x d.
-    Each entry (i, j) of the similarity matrix represents a similarity score for point i and point j of the input matrix;
-    similarity 1 means the points are identical, while similarity 0 means the points are far away.
-    The diagonal is set to 0, for the sake of graph Laplacians.
-    The sigma parameter controls the width of the Gaussian.
-*/
-Eigen::MatrixXd gaussian_similarity_matrix(const Eigen::MatrixXd& matrix, const double sigma) {
-    const int n = matrix.rows();
-    Eigen::MatrixXd similarity_matrix = Eigen::MatrixXd::Zero(n, n);
+void lanczos(const Matrix& local_L, int n, int count, int m, int k, Matrix& global_eigenvectors, int world_rank) {
+    
+    Matrix Q = Matrix::Zero(n, m);  // orthonormal basis
+    Eigen::VectorXd alpha = Eigen::VectorXd::Zero(m);
+    Eigen::VectorXd beta = Eigen::VectorXd::Zero(m);
+    
+    // Use a fixed seed for consistency across all ranks
+    Eigen::VectorXd q = Eigen::VectorXd::Zero(n);
+    if (world_rank == 0){
+        std::mt19937 gen(42); //fixed seed 42
+        std::normal_distribution<double> distance(0.0, 1.0);
+        for(int i = 0; i < n; i++){
+            q(i) = distance(gen);
+        }
+        q.normalize();
+    }
+    MPI_Bcast(q.data(), n, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+    Q.col(0) = q;
 
-    const double denominator = 2 * sigma * sigma;
-    double squared_euclidean_distance, similarity;
-    for (int i = 0; i < n; ++i) {
-        for (int j = i + 1; j < n; ++j) {
-            squared_euclidean_distance = (matrix.row(i) - matrix.row(j)).squaredNorm();
-            similarity = exp(-squared_euclidean_distance / denominator);
+    int l = world_rank * count; // Local offset
+    int idx = 0;                //Iterations of Lanczos algorithm
+
+    for (int j = 0; j < m; ++j) {
+        Eigen::VectorXd global_q = Q.col(j);
+        Eigen::VectorXd local_w(count);
+
+        // Matrix-Vector Multiplication (w = L * q)
+        #pragma omp parallel for
+        for (int i = 0; i < count; ++i) {
+            double sum = 0.0;
+            for (int col = 0; col < n; ++col) {
+                sum += local_L(i, col) * global_q(col);
+            }
+            local_w(i) = sum;
+        }
+
+        // Dot Product for Alpha
+        double local_alpha = 0.0;
+        #pragma omp parallel for reduction(+:local_alpha)
+        for (int i = 0; i < count; ++i) {
+            local_alpha += global_q(l + i) * local_w(i);
+        }
+        
+        double global_alpha;
+        MPI_Allreduce(&local_alpha, &global_alpha, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+        alpha(j) = global_alpha;
+
+        idx++;
+        if (j == m - 1) break;
+
+        // Parallel Vector Update (w' = w - alpha*q - beta*q_prev)
+        Eigen::VectorXd local_next_w(count);
+        double prev_beta = (j > 0) ? beta(j - 1) : 0.0;
+        
+        #pragma omp parallel for
+        for (int i = 0; i < count; ++i) {
+            double val = local_w(i) - global_alpha * global_q(l + i);
+            if (j > 0) {
+                val -= prev_beta * Q(l + i, j - 1);
+            }
+            local_next_w(i) = val;
+        }
+
+        //Re-ortoghonalization for better accuracy, otherwise there were duplicated eigenvalues
+        for(int i = 0; i < 2; i++){
+            Eigen::VectorXd local_overlaps = Q.block(l, 0, count, j + 1).transpose() * local_next_w;
+            Eigen::VectorXd global_overlaps(j + 1);
             
             MPI_Allreduce(local_overlaps.data(), global_overlaps.data(), j + 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
 
@@ -91,9 +141,11 @@ Eigen::MatrixXd gaussian_similarity_matrix(const Eigen::MatrixXd& matrix, const 
     }
 }
 
-std::vector<int> spectral_clustering(const Eigen::MatrixXd& matrix, const int k, double sigma = 1.0) {
-    const int n = matrix.rows();
-    Eigen::MatrixXd similarity_matrix = gaussian_similarity_matrix(matrix, sigma);
+std::vector<int> spectral_clustering(Matrix& X, int k, double sigma) {
+    int world_rank;
+    int world_size;
+    MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
+    MPI_Comm_size(MPI_COMM_WORLD, &world_size);
 
     int n = X.rows();
     int count = n / world_size; // number of rows for each process
@@ -116,9 +168,12 @@ std::vector<int> spectral_clustering(const Eigen::MatrixXd& matrix, const int k,
 
     MPI_Allreduce(MPI_IN_PLACE, degrees.data(), n, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
 
-    // eigen decomposition
-    const Eigen::SelfAdjointEigenSolver<Eigen::MatrixXd> solver(L);
-    Eigen::MatrixXd eigenvectors = solver.eigenvectors().leftCols(k);
+    if (world_rank == 0) {
+        double avg_deg = degrees.sum() / n;
+        std::cout << "DEBUG: Average Degree (connectivity) is: " << avg_deg << std::endl;
+        if (avg_deg < 5.0) std::cout << "WARNING: Graph is too sparse! Increase Sigma." << std::endl;
+        if (avg_deg > 100.0) std::cout << "WARNING: Graph is too dense! Decrease Sigma." << std::endl;
+    }
 
     // Construct the Local Laplacian directly
     Matrix local_L(count, n);
