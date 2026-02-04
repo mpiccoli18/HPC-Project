@@ -18,11 +18,11 @@ def plot_points2d(points: np.ndarray):
 
     plt.xlabel('X Axis')
     plt.ylabel('Y Axis')
-    plt.title('Spectral clustering with 500 data points')
+    plt.title('Spectral clustering with 16384 data points')
 
 
     # Save with transparency
-    #plt.savefig('plot1.png', transparent=True)
+    plt.savefig('plot4.png', transparent=True)
     plt.show()
     plt.close()
 
@@ -67,7 +67,7 @@ def plot_points3d(points: np.ndarray):
     print(f"Data range: {coords.min(axis=0)} to {coords.max(axis=0)}")
     print(f"Plotter bounds: {plotter.bounds}")
 
-    #plotter.screenshot("plot4.png", transparent_background=True)
+    #plotter.screenshot("plot1.png", transparent_background=True)
     plotter.close()
 
 
@@ -87,7 +87,7 @@ def main():
     with open(pargs.input_file, 'r') as file:
         points = parse_points(file)
         print("Opened file: %s", file)
-        plot_points3d(points)
+        #plot_points3d(points)
         plot_points2d(points)
 
 if __name__ == '__main__':
