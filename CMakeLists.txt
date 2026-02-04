@@ -1,20 +1,42 @@
 cmake_minimum_required(VERSION 3.10)
 project(SpectralClustering CXX)
 
-list(PREPEND CMAKE_PREFIX_PATH "${PROJECT_SOURCE_DIR}/lib/cmake")
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
-find_package(Eigen3 CONFIG REQUIRED)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -DNDEBUG -fopenmp")
 
 include_directories(${PROJECT_SOURCE_DIR}/include)
 
+# Eigen
+add_library(Eigen5 INTERFACE)
+target_include_directories(Eigen5 INTERFACE
+    ${PROJECT_SOURCE_DIR}/external/eigen-5.0.1
+)
+
+# MPI
+find_package(MPI REQUIRED)
+include_directories(${MPI_CXX_INCLUDE_PATH})
+
+# OpenMP
+find_package(OpenMP REQUIRED)
+
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin)
+
 set(SOURCES
-    src/main.cpp
-    src/spectral_clustering.cpp
-    src/k_means.cpp
+        src/csv.cpp
+        src/k_means.cpp
+        src/main.cpp
+        src/similarity_matrix.cpp
+        src/spectral_clustering.cpp
 )
 
 add_executable(spectral_clustering ${SOURCES})
 
-target_link_libraries(spectral_clustering Eigen3::Eigen)
+target_compile_options(spectral_clustering PRIVATE -O3 -march=native)
+
+target_link_libraries(spectral_clustering
+    PRIVATE
+        Eigen5
+        MPI::MPI_CXX
+        OpenMP::OpenMP_CXX
+)
