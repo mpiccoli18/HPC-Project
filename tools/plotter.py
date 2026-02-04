@@ -18,11 +18,10 @@ def plot_points2d(points: np.ndarray):
 
     plt.xlabel('X Axis')
     plt.ylabel('Y Axis')
-    plt.title('Spectral clustering with 16384 data points')
-
+    plt.title('Spectral clustering with 131072 data points')
 
     # Save with transparency
-    plt.savefig('plot4.png', transparent=True)
+    plt.savefig('plot9.png', transparent=True)
     plt.show()
     plt.close()
 
