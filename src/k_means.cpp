@@ -1,8 +1,8 @@
 #include "../include/k_means.hpp"
 #include "../include/similarity_matrix.hpp"
 
-Matrix init_centroids(const Matrix& X, int k) {
-    Matrix centroids(k, X.cols());
+Eigen::MatrixXd init_centroids(const Eigen::MatrixXd& matrix, const int k) {
+    Eigen::MatrixXd centroids(k, matrix.cols());
 
     std::default_random_engine rng(100);
     std::uniform_int_distribution<> dist(0, X.rows() - 1);
@@ -13,23 +13,17 @@ Matrix init_centroids(const Matrix& X, int k) {
     return centroids;
 }
 
-std::vector<int> k_means(const Matrix& X, int k, int max_iters) {
-    int world_rank;
-    int world_size;
-    MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
-    MPI_Comm_size(MPI_COMM_WORLD, &world_size);
+std::vector<int> k_means(const Eigen::MatrixXd& matrix, const int k, const int max_iters) {
+    Eigen::MatrixXd centroids = init_centroids(matrix, k);
+    std::vector<int> labels(matrix.rows(), 0);
+    double distance, min_distance;
+    for (int iter = 0; iter < max_iters; ++iter) {
+        for (int i = 0; i < matrix.rows(); ++i) {
+            min_distance = std::numeric_limits<double>::max();
+            int label = -1;
 
-    int n = X.rows();
-    int count = n / world_size; // number of rows for each process
-    int l = count * world_rank; // index of the local begin row
-    int r = count * (world_rank + 1); // index of the local end row
-    bool iterating = true;                 //boolean value for loops
-    int iter = 0;
-    int label;
-    Matrix local_centroid_sums, next_centroids;     //for calculating the centroids
-    
-
-    Matrix global_centroids(k, X.cols());
+            for (int j = 0; j < k; ++j) {
+                distance = (matrix.row(i) - centroids.row(j)).squaredNorm();
 
     if (world_rank == 0) {
         global_centroids = init_centroids(X, k);
