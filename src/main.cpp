@@ -7,8 +7,10 @@ int main(int argc, char** argv)
     MPI_Init(&argc, &argv);
     Eigen::setNbThreads(1);
     
-    const int n = points.size();
-    Eigen::MatrixXd X(n, 2);
+    int world_rank;
+    int world_size;
+    MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
+    MPI_Comm_size(MPI_COMM_WORLD, &world_size);
 
     if (world_rank == 0) {
         if (argc < 4) {
@@ -25,32 +27,30 @@ int main(int argc, char** argv)
     std::vector<int> labels;
     int max_label = 0;
 
-int main(int argc, char* argv[])
-{
-    if(argc >= 2){
-        //std::cout << argc << std::endl;
-        std::cout << "Usage: ./main input_file_path" << std::endl;
-    }else{
-        std::cout << "You haven't entered any file, end of the program!" << std::endl;
-        return 0;
-    }
+    if (world_rank == 0) {
+        if (!load_csv(input_path, X, labels)) {
+            std::cerr << "Error: cannot open input file at path " << argv[1] << std::endl;
+            return 1;
+        }
+        
+        rows = X.rows();
+        cols = X.cols();
+        max_label = *std::max_element(labels.begin(), labels.end());
+    } 
 
-    const std::string filename = argv[1];
-    Eigen::MatrixXd X;
+    //Broadcast rows, cols and label to all nodes
+    MPI_Bcast(&rows, 1, MPI_INT, 0, MPI_COMM_WORLD);
+    MPI_Bcast(&cols, 1, MPI_INT, 0, MPI_COMM_WORLD);
+    MPI_Bcast(&max_label, 1, MPI_INT, 0, MPI_COMM_WORLD);
 
-    //std::cout << filename << std::endl;
-    try{
-        X = load_points(filename);
-    } catch (const std::exception& e) {
-        std::cerr << "Error loading input: " << e.what() << std::endl;
-        return 1;
+    if(world_rank != 0){
+        X.resize(rows, cols);
     }
     MPI_Bcast(X.data(), rows * cols, MPI_DOUBLE, 0, MPI_COMM_WORLD);
 
-    const int k = 2;
-    const std::vector<int> labels = spectral_clustering(X, k, 1.0);
-
-    std::cout << "Spectral clustering results:\n";
+    double start_t = MPI_Wtime();   //start the time
+    
+    std::vector<int> output_labels = spectral_clustering(X, max_label + 1, sigma);
 
     double end_t = MPI_Wtime();     //stop the time
     if (world_rank == 0) {
