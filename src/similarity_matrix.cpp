@@ -42,13 +42,13 @@ std::vector<double> evaluate_gaussian_similarity_values(const Matrix& X, int l, 
 */
 
 std::vector<double> evaluate_diagonal_values(const Eigen::VectorXd& degrees, int l, int r) {
-    std::vector<double> diagonal_values(r - l);
+    std::vector<double> diagonal_values;
 
     for (int i = l; i < r; ++i) {
         if (degrees(i) > 1e-9) {
-            diagonal_values[i - l] = (1.0 / sqrt(degrees(i)));
+            diagonal_values.push_back(1.0 / sqrt(degrees(i)));
         } else {
-            diagonal_values[i - l] = 0.0;
+            diagonal_values.push_back(0.0);
         }
     }
     return diagonal_values;
