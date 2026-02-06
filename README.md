@@ -10,3 +10,11 @@ If you want to build the project, follow this steps:
 - Enter the directory `bin` with the command `cd bin`;
 - Next, execute the command `cmake ..` for building the dependencies inside the cmake files;
 - Finally, run `make` for creating the binary file.
+
+## How to execute the algorithm?
+In case you want to run the algorithm inside the cluster, follow this steps:
+- Change the `job.sh` as you like, specifying nodes, cpus, time and queue;
+- Compile and build the project following the steps above;
+- Finally, login in the cluster and execute `qsub job.sh`, it will return the ID of the jub you submitted (keep it, it's very important).
+
+For viewing the status of your job, simply run `qstat <job_id>`
