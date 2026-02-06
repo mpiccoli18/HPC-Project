@@ -2,6 +2,18 @@
 #include "../include/similarity_matrix.hpp"
 #include "../include/k_means.hpp"
 
+/*
+    @brief Lanczos method for calculating the top k eigenvectors of the Laplacian matrix
+    @param local_L: Local part of the Laplacian matrix for this process
+    @param n: Total number of data points (i.e. size of the graph)
+    @param count: Number of rows assigned to this process
+    @param m: Number of Lanczos iterations (..e. size of Krylov subspace)
+    @param k: Number of eigenvectors to compute (i.e. number of clusters)
+    @param global_eigenvectors: Output matrix to store the top k eigenvectors
+    @param world_rank: Rank of the current process
+    @return void 
+*/
+
 void lanczos(const Matrix& local_L, int n, int count, int m, int k, Matrix& global_eigenvectors, int world_rank) {
     
     Matrix Q = Matrix::Zero(n, m);  // orthonormal basis
@@ -140,6 +152,15 @@ void lanczos(const Matrix& local_L, int n, int count, int m, int k, Matrix& glob
         }
     }
 }
+
+
+/* @brief: Main function, it computes the Gaussian similarity matrix, constructs the normalized Laplacian and computes 
+           the top k eigenvectors thanks to the Lanczos method. It normalizes them, and finally applies k-means
+    @param X: Input data matrix
+    @param k: Number of clusters
+    @param sigma: Gaussian kernel bandwidth
+    @return: Vector of cluster assignments for each data point
+*/
 
 std::vector<int> spectral_clustering(Matrix& X, int k, double sigma) {
     int world_rank;

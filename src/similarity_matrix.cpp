@@ -2,11 +2,13 @@
 #include "../include/similarity_matrix.hpp"
 
 /*
-    Computes the similarity matrix for a given matrix of size n x d.
-    Each entry (i, j) of the similarity matrix represents a similarity score for point i and point j of the input matrix;
-    similarity 1 means the points are identical, while similarity 0 means the points are far away.
-    The diagonal is set to 0, for the sake of graph Laplacians.
-    The sigma parameter controls the width of the Gaussian.
+    @brief: Evaluates the Gaussian similarity values for a given matrix X and a given sigma, 1 means the points are identical
+            while 0 means the points are far away.
+    @param X: Input data matrix
+    @param l: Local start index for this process
+    @param r: Local end index for this process
+    @param sigma: Gaussian kernel bandwidth
+    @return Vector of similarity values for the local portion of the similarity matrix
 */
 
 std::vector<double> evaluate_gaussian_similarity_values(const Matrix& X, int l, int r, double sigma) {
@@ -31,24 +33,47 @@ std::vector<double> evaluate_gaussian_similarity_values(const Matrix& X, int l, 
     return similarity_values;
 }
 
+/*
+    @brief: Evaluates the diagonal values for the normalized Laplacian matrix, given the degree vector.
+    @param degrees: Vector of degrees for each node in the graph
+    @param l: Local start index for this process
+    @param r: Local end index for this process
+    @return Vector of diagonal values for the local portion of the normalized Laplacian
+*/
+
 std::vector<double> evaluate_diagonal_values(const Eigen::VectorXd& degrees, int l, int r) {
-    std::vector<double> diagonal_values;
+    std::vector<double> diagonal_values(r - l);
 
     for (int i = l; i < r; ++i) {
         if (degrees(i) > 1e-9) {
-            diagonal_values.push_back(1.0 / sqrt(degrees(i)));
+            diagonal_values[i - l] = (1.0 / sqrt(degrees(i)));
         } else {
-            diagonal_values.push_back(0.0);
+            diagonal_values[i - l] = 0.0;
         }
     }
     return diagonal_values;
 }
+
+/*
+    @brief: Normalizes the rows of the input matrix X.
+    @param X: Input matrix to be normalized
+    @return void
+*/
 
 void normalize_eigenvectors(Matrix& X) {
     for (int i = 0; i < X.rows(); ++i) {
         X.row(i).normalize();
     }
 }
+
+/*
+    @brief: Evaluates the k-means labels for a given matrix of centroids and a given input matrix X.
+    @param X: Input data matrix
+    @param centroids: Matrix of centroids, where each row is a centroid
+    @param l: Local start index for this process
+    @param r: Local end index for this process
+    @return Vector of cluster labels for the local data points
+*/
 
 std::vector<int> evaluate_k_means_labels(const Matrix& X, const Matrix& centroids, int l, int r) {
     int count = r - l;

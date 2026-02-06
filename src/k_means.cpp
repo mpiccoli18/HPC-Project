@@ -1,6 +1,13 @@
 #include "../include/k_means.hpp"
 #include "../include/similarity_matrix.hpp"
 
+/*
+    @brief: Initializes k centroids by randomly sampling k data points from the input matrix X.
+    @param X: Input data matrix
+    @param k: Number of centroids to initialize
+    @return Matrix of initialized centroids, where each row is a centroid
+*/
+
 Matrix init_centroids(const Matrix& X, int k) {
     Matrix centroids(k, X.cols());
 
@@ -12,6 +19,14 @@ Matrix init_centroids(const Matrix& X, int k) {
     }
     return centroids;
 }
+
+/*
+    @brief: Main function for k-means clustering. It initializes centroids, assigns labels, updates centroids iteratively until convergence.
+    @param X: Input data matrix
+    @param k: Number of clusters
+    @param max_iters: Maximum number of iterations to run the algorithm
+    @return Vector of cluster assignments for each data point
+*/
 
 std::vector<int> k_means(const Matrix& X, int k, int max_iters) {
     int world_rank;
@@ -85,7 +100,6 @@ std::vector<int> k_means(const Matrix& X, int k, int max_iters) {
         } 
         global_centroids = next_centroids;
         iter++;
-        //MPI_Bcast(&iterating, 1, MPI_CXX_BOOL, 0, MPI_COMM_WORLD);   //broadcast loop or not
     }
     
     // After convergence gather
