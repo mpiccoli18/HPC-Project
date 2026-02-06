@@ -4,3 +4,9 @@ of the master in Computer Science.
 
 Member of the project:
 - Marco Piccoli
+
+## How to build the project?
+If you want to build the project, follow this steps:
+- Enter the directory `bin` with the command `cd bin`;
+- Next, execute the command `cmake ..` for building the dependencies inside the cmake files;
+- Finally, run `make` for creating the binary file.
