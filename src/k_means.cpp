@@ -65,7 +65,7 @@ std::vector<int> k_means(const Matrix& X, int k, int max_iters) {
 
         // Partial sum calculation
         local_centroid_sums = Matrix::Zero(k, X.cols());
-        std::vector<int> local_counts(k, 0); // ADDED: Reset counts to 0 at start of every iteration
+        std::vector<int> local_counts(k, 0);
 
         for (int i = 0; i < count; ++i) {
             label = local_labels[i];
