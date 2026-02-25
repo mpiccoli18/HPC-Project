@@ -1,5 +1,5 @@
 #!/bin/bash
-#PBS -l select=2:ncpus=2:mpiprocs=1:mem=512gb -l place=pack:excl
+#PBS -l select=4:ncpus=16:mpiprocs=1:mem=256gb -l place=pack:excl
 #PBS -l walltime=1:00:00
 #PBS -q shortCPUQ
 
@@ -11,7 +11,7 @@ module load OpenMPI/4.1.1-GCC-11.2.0
 cd $PBS_O_WORKDIR
 
 export PBS_O_PATH=$PATH
-export OMP_NUM_THREADS=8
+export OMP_NUM_THREADS=16
 export OMP_PROC_BIND=close
 export OMP_PLACES=cores
 export OMP_NESTED=false
@@ -37,5 +37,5 @@ for i in "${!datasets[@]}"; do
         --mca btl ^openib \
         --mca oob ^ud \
         --hostfile $PBS_NODEFILE \
-        -n 2 ./bin/spectral_clustering "$INPUT_PATH" "$OUTPUT_PATH" "$sigma"
+        -n 4 ./bin/spectral_clustering "$INPUT_PATH" "$OUTPUT_PATH" "$sigma"
 done

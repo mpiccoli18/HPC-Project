@@ -2,43 +2,41 @@
 Dataset, Time(s)
 DEBUG: Average Degree (connectivity) is: 44.8714
 Starting Lanczos Solver (60 iters)...
-Lanczos Solver Finished in 0.0119455 seconds!
+Lanczos Solver Finished in 0.00583153 seconds!
 K-Means Iteration: 0
 K-Means Iteration: 1
-Warning: Cluster 2 is empty. Re-initializing...
 K-Means Iteration: 2
-Dataset: ./data/input/test_512.csv | Ranks: 2 | Number of threads: 8 | Execution Time: 0.0142375s | Value of sigma: 1
+Dataset: ./data/input/test_512.csv | Ranks: 2 | Number of threads: 2 | Execution Time: 0.00787431s | Value of sigma: 1
 DEBUG: Average Degree (connectivity) is: 39.6112
 Starting Lanczos Solver (60 iters)...
-Lanczos Solver Finished in 0.063131 seconds!
+Lanczos Solver Finished in 0.0559907 seconds!
 K-Means Iteration: 0
 K-Means Iteration: 1
 K-Means Iteration: 2
-Dataset: ./data/input/test_1024.csv | Ranks: 2 | Number of threads: 8 | Execution Time: 0.0758515s | Value of sigma: 0.6
+Dataset: ./data/input/test_1024.csv | Ranks: 2 | Number of threads: 2 | Execution Time: 0.0689671s | Value of sigma: 0.6
 DEBUG: Average Degree (connectivity) is: 41.7309
 Starting Lanczos Solver (60 iters)...
-Lanczos Solver Finished in 0.192593 seconds!
+Lanczos Solver Finished in 0.185084 seconds!
 K-Means Iteration: 0
 K-Means Iteration: 1
 K-Means Iteration: 2
 K-Means Iteration: 3
 K-Means Iteration: 4
 K-Means Iteration: 5
-K-Means Iteration: 6
-Dataset: ./data/input/test_2048.csv | Ranks: 2 | Number of threads: 8 | Execution Time: 0.251169s | Value of sigma: 0.45
+Dataset: ./data/input/test_2048.csv | Ranks: 2 | Number of threads: 2 | Execution Time: 0.242598s | Value of sigma: 0.45
 DEBUG: Average Degree (connectivity) is: 44.3864
 Starting Lanczos Solver (60 iters)...
-Lanczos Solver Finished in 0.377047 seconds!
+Lanczos Solver Finished in 0.373978 seconds!
 K-Means Iteration: 0
 K-Means Iteration: 1
 K-Means Iteration: 2
 K-Means Iteration: 3
 K-Means Iteration: 4
 K-Means Iteration: 5
-Dataset: ./data/input/test_4096.csv | Ranks: 2 | Number of threads: 8 | Execution Time: 0.530866s | Value of sigma: 0.35
+Dataset: ./data/input/test_4096.csv | Ranks: 2 | Number of threads: 2 | Execution Time: 0.525793s | Value of sigma: 0.35
 DEBUG: Average Degree (connectivity) is: 36.1274
 Starting Lanczos Solver (60 iters)...
-Lanczos Solver Finished in 1.57162 seconds!
+Lanczos Solver Finished in 1.585 seconds!
 K-Means Iteration: 0
 K-Means Iteration: 1
 K-Means Iteration: 2
@@ -59,10 +57,10 @@ K-Means Iteration: 16
 K-Means Iteration: 17
 K-Means Iteration: 18
 K-Means Iteration: 19
-Dataset: ./data/input/test_8192.csv | Ranks: 2 | Number of threads: 8 | Execution Time: 2.16571s | Value of sigma: 0.25
+Dataset: ./data/input/test_8192.csv | Ranks: 2 | Number of threads: 2 | Execution Time: 2.18597s | Value of sigma: 0.25
 DEBUG: Average Degree (connectivity) is: 39.0823
 Starting Lanczos Solver (60 iters)...
-Lanczos Solver Finished in 7.59743 seconds!
+Lanczos Solver Finished in 7.58757 seconds!
 K-Means Iteration: 0
 K-Means Iteration: 1
 K-Means Iteration: 2
@@ -85,10 +83,10 @@ K-Means Iteration: 18
 K-Means Iteration: 19
 K-Means Iteration: 20
 K-Means Iteration: 21
-Dataset: ./data/input/test_16384.csv | Ranks: 2 | Number of threads: 8 | Execution Time: 10.2512s | Value of sigma: 0.2
+Dataset: ./data/input/test_16384.csv | Ranks: 2 | Number of threads: 2 | Execution Time: 10.212s | Value of sigma: 0.2
 DEBUG: Average Degree (connectivity) is: 34.2297
 Starting Lanczos Solver (60 iters)...
-Lanczos Solver Finished in 28.9119 seconds!
+Lanczos Solver Finished in 31.6604 seconds!
 K-Means Iteration: 0
 K-Means Iteration: 1
 K-Means Iteration: 2
@@ -113,10 +111,10 @@ K-Means Iteration: 20
 K-Means Iteration: 21
 K-Means Iteration: 22
 K-Means Iteration: 23
-Dataset: ./data/input/test_32768.csv | Ranks: 2 | Number of threads: 8 | Execution Time: 38.7432s | Value of sigma: 0.15
+Dataset: ./data/input/test_32768.csv | Ranks: 2 | Number of threads: 2 | Execution Time: 43.506s | Value of sigma: 0.15
 DEBUG: Average Degree (connectivity) is: 20.988
 Starting Lanczos Solver (60 iters)...
-Lanczos Solver Finished in 117.132 seconds!
+Lanczos Solver Finished in 112.326 seconds!
 K-Means Iteration: 0
 K-Means Iteration: 1
 K-Means Iteration: 2
@@ -142,4 +140,4 @@ K-Means Iteration: 21
 K-Means Iteration: 22
 K-Means Iteration: 23
 K-Means Iteration: 24
-Dataset: ./data/input/test_65536.csv | Ranks: 2 | Number of threads: 8 | Execution Time: 156.235s | Value of sigma: 0.1
+Dataset: ./data/input/test_65536.csv | Ranks: 2 | Number of threads: 2 | Execution Time: 152.338s | Value of sigma: 0.1
