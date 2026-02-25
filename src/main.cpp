@@ -54,8 +54,15 @@ int main(int argc, char** argv)
 
     double end_t = MPI_Wtime();     //stop the time
     if (world_rank == 0) {
+        int nthreads = 0;
+        #pragma omp parallel
+        {
+            #pragma omp single
+            nthreads = omp_get_num_threads();
+        }
         std::cout << "Dataset: " << input_path 
                   << " | Ranks: " << world_size 
+                  << " | Number of threads: " << nthreads
                   << " | Execution Time: " << (end_t - start_t) << "s" 
                   << " | Value of sigma: " << sigma
                   << std::endl;        
