@@ -1,5 +1,5 @@
 #!/bin/bash
-#PBS -l select=4:ncpus=16:mpiprocs=1:mem=256gb -l place=pack:excl
+#PBS -l select=4:ncpus=16:mpiprocs=1:mem=256gb -l place=scatter:excl
 #PBS -l walltime=1:00:00
 #PBS -q shortCPUQ
 
@@ -22,7 +22,7 @@ sigmas=("1.0" "0.6" "0.45" "0.35" "0.25" "0.2" "0.15" "0.1")
 
 datasets2=("test_131072.csv")
 
-echo "--- Parallel Performance Benchmark PACK:EXCL ---" 
+echo "--- Parallel Performance Benchmark SCATTER ---" 
 echo "Dataset, Time(s)"
 
 for i in "${!datasets[@]}"; do
