@@ -1,0 +1,11 @@
+--- Serial Performance Benchmark SCATTER ---
+Dataset, Time(s)
+Serial Execution Time: 0.0072898s
+Serial Execution Time: 0.0339003s
+Serial Execution Time: 0.130066s
+Serial Execution Time: 1.27616s
+Serial Execution Time: 6.34971s
+Serial Execution Time: 25.7923s
+Serial Execution Time: 107.445s
+Serial Execution Time: 407.397s
+Serial Execution Time: 2534.7s
