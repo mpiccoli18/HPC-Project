@@ -1,5 +1,5 @@
 #!/bin/bash
-#PBS -l select=1:ncpus=1:mem=256gb -l place=excl
+#PBS -l select=1:ncpus=1:mem=512gb -l place=excl
 #PBS -l walltime=6:00:00
 #PBS -q shortCPUQ
 
